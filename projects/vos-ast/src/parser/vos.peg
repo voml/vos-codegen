@@ -1,0 +1,37 @@
+@export
+PromptNode = {part:PartNode | Split} $;
+
+@position
+PartNode = @:StrongNode | @:WeakNode | @:TotalNode | @:NumNode | @:WordNode ;
+
+@position
+WordNode = {id:IdentNode}+;
+
+@position
+StrongNode = '{' {parts:PartNode | Split} '}' [Times num:NumNode];
+
+@position
+WeakNode   = '[' {parts:PartNode | Split} ']' [Times num:NumNode];
+
+@position
+TotalNode   = '(' {parts:PartNode | Split} ')';
+
+@char
+Split = ',' | '，';
+
+@char
+Times = '*' | '×';
+
+@string
+@position
+@no_skip_ws
+NumNode = {'0'..'9'}+;
+
+@string
+@position
+@no_skip_ws
+IdentNode = {XID_CONTINUE | '-'}+;
+
+@char
+@check(unicode_ident::is_xid_continue)
+XID_CONTINUE = char;

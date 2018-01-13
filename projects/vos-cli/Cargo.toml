@@ -1,6 +1,5 @@
 [package]
-name = "vos-cli"
-publish = false
+name = "vos"
 version = "0.0.0"
 authors = ["Aster <192607617@qq.com>"]
 description = "..."

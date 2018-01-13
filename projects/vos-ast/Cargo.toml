@@ -1,18 +1,27 @@
 [package]
-name = "sub_projects"
-publish = false
+name = "vos-ast"
 version = "0.0.0"
 authors = ["Aster <192607617@qq.com>"]
 description = "..."
 repository = "https://github.com/oovm/sub_projects"
-documentation = "https://docs.rs/sub_projects"
+documentation = "https://docs.rs/vos-ast"
 readme = "Readme.md"
 license = "MPL-2.0"
 edition = "2021"
 
 [dependencies]
+peginator = "0.3.0"
+unicode-ident = "1.0.5"
+
+[dependencies.vos-error]
+version = "0.0.0"
+path = "../vos-error"
+features = ["peginator"]
 
 [dev-dependencies]
+
+[build-dependencies]
+peginator = "0.3.0"
 
 [features]
 default = []
