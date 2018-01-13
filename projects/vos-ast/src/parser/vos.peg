@@ -1,36 +1,37 @@
 @export
-PromptNode = {part:PartNode | Split} $;
+VosParser = {statements:VosStatementNode} $;
 
 @position
-PartNode = @:StrongNode | @:WeakNode | @:TotalNode | @:NumNode | @:WordNode ;
+VosStatementNode =
+	@:DeclareStatementNode |
+	@:IdentifierNode;
 
 @position
-WordNode = {id:IdentNode}+;
+DeclareStatementNode = declare:DeclareWord {modifiers:ModifierNode} IdentifierNode;
 
+@string
 @position
-StrongNode = '{' {parts:PartNode | Split} '}' [Times num:NumNode];
-
-@position
-WeakNode   = '[' {parts:PartNode | Split} ']' [Times num:NumNode];
-
-@position
-TotalNode   = '(' {parts:PartNode | Split} ')';
-
-@char
-Split = ',' | '，';
-
-@char
-Times = '*' | '×';
+DeclareWord =
+	"type" | "class" |
+	"struct" | "structure" |
+	"enum" | "enumerate" | "union";
 
 @string
 @position
 @no_skip_ws
 NumNode = {'0'..'9'}+;
 
+@position
+ModifierNode = IdentifierNode !('{'|'[');
+
 @string
 @position
 @no_skip_ws
-IdentNode = {XID_CONTINUE | '-'}+;
+IdentifierNode = (XID_START | '_') {XID_CONTINUE};
+
+@char
+@check(unicode_ident::is_xid_start)
+XID_START = char;
 
 @char
 @check(unicode_ident::is_xid_continue)
