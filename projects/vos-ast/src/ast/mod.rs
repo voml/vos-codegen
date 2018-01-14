@@ -1,6 +1,6 @@
 #[derive(Debug, Clone)]
 pub struct VosAST {
-    statements: Vec<VosStatement>,
+    pub statements: Vec<VosStatement>,
 }
 
 #[derive(Debug, Clone)]
@@ -13,5 +13,5 @@ pub enum TableKind {}
 
 #[derive(Debug, Clone)]
 pub struct TableStatement {
-    kind: TableKind,
+    pub kind: TableKind,
 }
