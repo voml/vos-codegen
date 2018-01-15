@@ -2,8 +2,8 @@ use peginator::PegParser;
 
 use vos_error::{VosError, VosResult};
 
-use crate::ast::VosAST;
-use crate::parser::vos::{VosParser, VosStatementNode};
+use crate::ast::{TableKind, TableStatement, VosAST, VosStatement};
+use crate::parser::vos::{DeclareStatementNode, VosParser, VosStatementNode};
 
 mod vos;
 
@@ -38,14 +38,51 @@ pub fn parse(input: &str) -> Result<VosAST, Vec<VosError>> {
 impl VosVisitor {
     pub fn parse(&mut self, input: &str) -> VosResult {
         for statement in VosParser::parse(input)?.statements {
-            if let Err(e) = self.visit_statement(statement) { self.errors.push(e) }
+            match self.visit_statement(statement) {
+                Ok(_) => {}
+                Err(e) => { self.errors.push(e) }
+            }
         }
         return Ok(());
     }
 
 
     fn visit_statement(&mut self, node: VosStatementNode) -> VosResult {
+        match node {
+            VosStatementNode::DeclareStatementNode(s) => {
+                let stmt = VosStatement::Table(Box::new(s.visit(self)?));
+                self.ast.statements.push(stmt)
+            }
+            VosStatementNode::DefineStatementNode(s) => {}
+        }
         Ok(())
+    }
+}
+
+impl DeclareStatementNode {
+    fn declare(&self) -> &str {
+        match self.modifiers.first() {
+            None => { "" }
+            Some(s) => {
+                s.string.as_str()
+            }
+        }
+    }
+    fn visit(self, visitor: &mut VosVisitor) -> VosResult<TableStatement> {
+        let kind = match self.declare() {
+            "" => {
+                return Err(VosError::parse_error(format!("declare keyword not found")));
+            }
+            "class" | "table" => { TableKind::Structure }
+            "struct" | "structure" => { TableKind::Structure }
+            _ => {
+                return Err(VosError::parse_error(format!("`{}` not a valid declare keyword", self.declare())));
+            }
+        };
+
+        Ok(TableStatement {
+            kind
+        })
     }
 }
 

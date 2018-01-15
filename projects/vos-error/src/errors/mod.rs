@@ -30,3 +30,15 @@ impl VosError {
         }
     }
 }
+
+impl VosError {
+    pub fn parse_error(message: impl Into<String>) -> Self {
+        Self {
+            kind: Box::new(VosErrorKind::ParseError {
+                message: message.into(),
+                file: "".to_string(),
+                range: None,
+            })
+        }
+    }
+}

@@ -4,17 +4,16 @@ VosParser = {statements:VosStatementNode} $;
 @position
 VosStatementNode =
 	@:DeclareStatementNode |
-	@:IdentifierNode;
+	@:DefineStatementNode ;
 
 @position
-DeclareStatementNode = declare:DeclareWord {modifiers:ModifierNode} IdentifierNode;
+DeclareStatementNode = {modifiers:ModifierNode} id:IdentifierNode '{' body:DeclareBodyNode '}';
 
-@string
 @position
-DeclareWord =
-	"type" | "class" |
-	"struct" | "structure" |
-	"enum" | "enumerate" | "union";
+DefineStatementNode = {modifiers:ModifierNode} id:IdentifierNode '{' body:DeclareBodyNode '}';
+
+@position
+DeclareBodyNode = {id:IdentifierNode};
 
 @string
 @position
@@ -22,6 +21,7 @@ DeclareWord =
 NumNode = {'0'..'9'}+;
 
 @position
+@string
 ModifierNode = IdentifierNode !('{'|'[');
 
 @string
