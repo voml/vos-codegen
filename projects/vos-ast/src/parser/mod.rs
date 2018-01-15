@@ -3,7 +3,7 @@ use peginator::PegParser;
 use vos_error::{VosError, VosResult};
 
 use crate::ast::{TableKind, TableStatement, VosAST, VosStatement};
-use crate::parser::vos::{DeclareStatementNode, VosParser, VosStatementNode};
+use crate::parser::vos::{StructDeclareNode, TableDeclareNode, VosParser, VosStatementNode};
 
 mod vos;
 
@@ -15,7 +15,9 @@ struct VosVisitor {
 #[test]
 fn test() {
     let vos = parse(r#"
-class inline Color
+class Color {}
+
+table Color32 {}
 
     "#).unwrap();
     println!("{:#?}", vos)
@@ -45,44 +47,34 @@ impl VosVisitor {
         }
         return Ok(());
     }
-
-
     fn visit_statement(&mut self, node: VosStatementNode) -> VosResult {
         match node {
-            VosStatementNode::DeclareStatementNode(s) => {
-                let stmt = VosStatement::Table(Box::new(s.visit(self)?));
+            VosStatementNode::StructDeclareNode(s) => {
+                let stmt = s.visit(self)?;
                 self.ast.statements.push(stmt)
             }
-            VosStatementNode::DefineStatementNode(s) => {}
+            VosStatementNode::TableDeclareNode(s) => {
+                let stmt = s.visit(self)?;
+                self.ast.statements.push(stmt)
+            }
         }
         Ok(())
     }
 }
 
-impl DeclareStatementNode {
-    fn declare(&self) -> &str {
-        match self.modifiers.first() {
-            None => { "" }
-            Some(s) => {
-                s.string.as_str()
-            }
-        }
+impl StructDeclareNode {
+    fn visit(self, visitor: &mut VosVisitor) -> VosResult<VosStatement> {
+        Ok(VosStatement::Table(Box::new(TableStatement {
+            kind: TableKind::Structure
+        })))
     }
-    fn visit(self, visitor: &mut VosVisitor) -> VosResult<TableStatement> {
-        let kind = match self.declare() {
-            "" => {
-                return Err(VosError::parse_error(format!("declare keyword not found")));
-            }
-            "class" | "table" => { TableKind::Structure }
-            "struct" | "structure" => { TableKind::Structure }
-            _ => {
-                return Err(VosError::parse_error(format!("`{}` not a valid declare keyword", self.declare())));
-            }
-        };
+}
 
-        Ok(TableStatement {
-            kind
-        })
+impl TableDeclareNode {
+    fn visit(self, visitor: &mut VosVisitor) -> VosResult<VosStatement> {
+        Ok(VosStatement::Table(Box::new(TableStatement {
+            kind: TableKind::Table
+        })))
     }
 }
 

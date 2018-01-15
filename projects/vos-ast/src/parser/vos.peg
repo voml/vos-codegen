@@ -3,17 +3,32 @@ VosParser = {statements:VosStatementNode} $;
 
 @position
 VosStatementNode =
-	@:DeclareStatementNode |
-	@:DefineStatementNode ;
+	@:TableDeclareNode |
+	@:StructDeclareNode ;
 
 @position
-DeclareStatementNode = {modifiers:ModifierNode} id:IdentifierNode '{' body:DeclareBodyNode '}';
+TableDeclareNode = TableDeclare id:IdentifierNode '{' body:DeclareBodyNode '}';
+TableDeclare = 'table';
 
 @position
-DefineStatementNode = {modifiers:ModifierNode} id:IdentifierNode '{' body:DeclareBodyNode '}';
+StructDeclareNode = StructDeclare id:IdentifierNode '{' body:DeclareBodyNode '}';
+StructDeclare = 'class' | 'struct' | 'structure';
 
 @position
-DeclareBodyNode = {id:IdentifierNode};
+DefineStatementNode = DefineDeclare id:IdentifierNode '{' body:DeclareBodyNode '}';
+DefineDeclare = 'def' | 'define' | 'fn' | 'fun' | 'function';
+
+@position
+DeclareBodyNode = {pairs:KeyValueNode};
+
+KeyValueNode = {[Dot] key:KeyNode (':'|'=') value:ValueNode};
+
+KeyNode = @:IdentifierNode | @:NumNode;
+
+ValueNode = @:IdentifierNode | @:NumNode;
+
+Dot = '.';
+
 
 @string
 @position
