@@ -2,22 +2,27 @@ use peginator::PegParser;
 
 use vos_error::{VosError, VosResult};
 
-use crate::ast::{TableKind, TableStatement, VosAST, VosStatement};
+use crate::ast::{Position, TableKind, TableStatement, VosAST, VosStatement};
 use crate::parser::vos::{StructDeclareNode, TableDeclareNode, VosParser, VosStatementNode};
 
 mod vos;
 
 struct VosVisitor {
     ast: VosAST,
+    file: String,
     errors: Vec<VosError>,
 }
 
 #[test]
 fn test() {
     let vos = parse(r#"
-class Color {}
+class Color {
+    r: u8
+}
 
-table Color32 {}
+table Color32 {
+    r: f32
+}
 
     "#).unwrap();
     println!("{:#?}", vos)
@@ -26,6 +31,7 @@ table Color32 {}
 pub fn parse(input: &str) -> Result<VosAST, Vec<VosError>> {
     let mut parser = VosVisitor {
         ast: VosAST { statements: vec![] },
+        file: "<anonymous>".to_string(),
         errors: vec![],
     };
     if let Err(e) = parser.parse(input) {
@@ -64,16 +70,22 @@ impl VosVisitor {
 
 impl StructDeclareNode {
     fn visit(self, visitor: &mut VosVisitor) -> VosResult<VosStatement> {
+        let Self { id, body, .. } = self;
         Ok(VosStatement::Table(Box::new(TableStatement {
-            kind: TableKind::Structure
+            kind: TableKind::Structure,
+            name: id.string,
+            name_position: Position::new(id.position, &visitor.file),
         })))
     }
 }
 
 impl TableDeclareNode {
     fn visit(self, visitor: &mut VosVisitor) -> VosResult<VosStatement> {
+        let Self { id, body, .. } = self;
         Ok(VosStatement::Table(Box::new(TableStatement {
-            kind: TableKind::Table
+            kind: TableKind::Table,
+            name: id.string,
+            name_position: Position::new(id.position, &visitor.file),
         })))
     }
 }

@@ -18,16 +18,18 @@ StructDeclare = 'class' | 'struct' | 'structure';
 DefineStatementNode = DefineDeclare id:IdentifierNode '{' body:DeclareBodyNode '}';
 DefineDeclare = 'def' | 'define' | 'fn' | 'fun' | 'function';
 
-@position
-DeclareBodyNode = {pairs:KeyValueNode};
 
-KeyValueNode = {[Dot] key:KeyNode (':'|'=') value:ValueNode};
+DeclareBodyNode = @:KeyValueNode | @:KeyValueDot | @:Split ;
+
+KeyValueNode = {key:KeyNode (':'|'=') value:ValueNode};
+KeyValueDot = {Dot key:KeyNode (':'|'=') value:ValueNode};
 
 KeyNode = @:IdentifierNode | @:NumNode;
 
 ValueNode = @:IdentifierNode | @:NumNode;
 
-Dot = '.';
+Dot = '.' | '。';
+Split = ';' | ',' | '，';
 
 
 @string
