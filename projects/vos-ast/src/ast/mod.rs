@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 use std::fmt::{Debug, Formatter};
 use std::ops::Range;
+use crate::StringConstraint;
 
 mod display;
 mod table;
@@ -26,7 +27,6 @@ pub enum VosStatement {
 pub struct TableStatement {
     pub kind: TableKind,
     pub name: String,
-    pub name_position: Position,
     pub fields: BTreeMap<String, FieldStatement>,
 }
 
@@ -50,15 +50,24 @@ pub enum TableKind {
 
 #[derive(Debug, Clone)]
 pub struct FieldStatement {
-    pub name: String,
+    pub field: String,
     pub value: ValueStatement,
+    pub range: Range<usize>,
 }
+
+#[derive(Debug, Clone)]
+pub enum ConstraintStatement {
+    String(StringConstraint)
+}
+
+
 
 #[derive(Debug, Clone)]
 pub enum ValueStatement {
     Default,
-    String(String)
+    String(String),
 }
+
 
 impl Position {
     pub fn new(range: Range<usize>, file: &str) -> Position {

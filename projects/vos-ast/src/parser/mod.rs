@@ -1,10 +1,10 @@
-use peginator::PegParser;
+use peginator::{PegParser, PegPosition};
 
 use vos_error::{VosError, VosResult};
 
 use crate::ast::{TableKind, TableStatement, VosAST, VosStatement};
 use crate::FieldStatement;
-use crate::parser::vos::{DeclareBodyNode, IdentifierNode, VosParser, VosStatementNode};
+use crate::parser::vos::{DeclareBodyNode, IdentifierNode, KeyNode, VosParser, VosStatementNode};
 
 mod vos;
 
@@ -70,11 +70,18 @@ impl VosVisitor {
         Ok(())
     }
     fn push_table(&mut self, mut table: TableStatement, id: IdentifierNode, body: Vec<DeclareBodyNode>) -> VosResult {
-        table.set_name(&id.string, &self.file, id.position);
+        table.set_name(&id.string);
         for term in body {
             match term {
                 DeclareBodyNode::KeyValueDot(_) => {}
-                DeclareBodyNode::KeyValueNode(_) => {}
+                DeclareBodyNode::KeyValueNode(v) => {
+                    match table.add_field(v.key.as_str(), v.key.position().clone()) {
+                        Ok(_) => {}
+                        Err(e) => {
+                            todo!("重复的 key {}", e.field)
+                        }
+                    }
+                }
                 DeclareBodyNode::Split(_) => {}
             }
         }
@@ -83,9 +90,17 @@ impl VosVisitor {
     }
 }
 
-
 impl DeclareBodyNode {
     fn visit(self, visitor: &mut VosVisitor) -> VosResult<FieldStatement> {
         todo!()
+    }
+}
+
+impl KeyNode {
+    pub fn as_str(&self) -> String {
+        match self {
+            KeyNode::IdentifierNode(v) => { v.string.to_owned() }
+            KeyNode::NumNode(v) => { v.string.to_owned() }
+        }
     }
 }
