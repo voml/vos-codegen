@@ -7,15 +7,15 @@ VosStatementNode =
 	@:StructDeclareNode ;
 
 @position
-TableDeclareNode = TableDeclare id:IdentifierNode '{' body:DeclareBodyNode '}';
+TableDeclareNode = TableDeclare id:IdentifierNode '{' {body:DeclareBodyNode} '}';
 TableDeclare = 'table';
 
 @position
-StructDeclareNode = StructDeclare id:IdentifierNode '{' body:DeclareBodyNode '}';
+StructDeclareNode = StructDeclare id:IdentifierNode '{' {body:DeclareBodyNode} '}';
 StructDeclare = 'class' | 'struct' | 'structure';
 
 @position
-DefineStatementNode = DefineDeclare id:IdentifierNode '{' body:DeclareBodyNode '}';
+DefineStatementNode = DefineDeclare id:IdentifierNode '{' {body:DeclareBodyNode} '}';
 DefineDeclare = 'def' | 'define' | 'fn' | 'fun' | 'function';
 
 

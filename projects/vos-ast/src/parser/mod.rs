@@ -2,8 +2,9 @@ use peginator::PegParser;
 
 use vos_error::{VosError, VosResult};
 
-use crate::ast::{Position, TableKind, TableStatement, VosAST, VosStatement};
-use crate::parser::vos::{StructDeclareNode, TableDeclareNode, VosParser, VosStatementNode};
+use crate::ast::{TableKind, TableStatement, VosAST, VosStatement};
+use crate::FieldStatement;
+use crate::parser::vos::{DeclareBodyNode, IdentifierNode, VosParser, VosStatementNode};
 
 mod vos;
 
@@ -31,7 +32,7 @@ table Color32 {
 pub fn parse(input: &str) -> Result<VosAST, Vec<VosError>> {
     let mut parser = VosVisitor {
         ast: VosAST { statements: vec![] },
-        file: "<anonymous>".to_string(),
+        file: "".to_string(),
         errors: vec![],
     };
     if let Err(e) = parser.parse(input) {
@@ -56,37 +57,35 @@ impl VosVisitor {
     fn visit_statement(&mut self, node: VosStatementNode) -> VosResult {
         match node {
             VosStatementNode::StructDeclareNode(s) => {
-                let stmt = s.visit(self)?;
-                self.ast.statements.push(stmt)
+                let mut table = TableStatement::default();
+                table.kind = TableKind::Structure;
+                self.push_table(table, s.id, s.body)?
             }
             VosStatementNode::TableDeclareNode(s) => {
-                let stmt = s.visit(self)?;
-                self.ast.statements.push(stmt)
+                let mut table = TableStatement::default();
+                table.kind = TableKind::Table;
+                self.push_table(table, s.id, s.body)?
             }
         }
         Ok(())
     }
-}
-
-impl StructDeclareNode {
-    fn visit(self, visitor: &mut VosVisitor) -> VosResult<VosStatement> {
-        let Self { id, body, .. } = self;
-        Ok(VosStatement::Table(Box::new(TableStatement {
-            kind: TableKind::Structure,
-            name: id.string,
-            name_position: Position::new(id.position, &visitor.file),
-        })))
+    fn push_table(&mut self, mut table: TableStatement, id: IdentifierNode, body: Vec<DeclareBodyNode>) -> VosResult {
+        table.set_name(&id.string, &self.file, id.position);
+        for term in body {
+            match term {
+                DeclareBodyNode::KeyValueDot(_) => {}
+                DeclareBodyNode::KeyValueNode(_) => {}
+                DeclareBodyNode::Split(_) => {}
+            }
+        }
+        self.ast.statements.push(VosStatement::Table(Box::new(table)));
+        Ok(())
     }
 }
 
-impl TableDeclareNode {
-    fn visit(self, visitor: &mut VosVisitor) -> VosResult<VosStatement> {
-        let Self { id, body, .. } = self;
-        Ok(VosStatement::Table(Box::new(TableStatement {
-            kind: TableKind::Table,
-            name: id.string,
-            name_position: Position::new(id.position, &visitor.file),
-        })))
+
+impl DeclareBodyNode {
+    fn visit(self, visitor: &mut VosVisitor) -> VosResult<FieldStatement> {
+        todo!()
     }
 }
-

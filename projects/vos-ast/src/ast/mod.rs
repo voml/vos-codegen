@@ -1,5 +1,9 @@
+use std::collections::BTreeMap;
 use std::fmt::{Debug, Formatter};
 use std::ops::Range;
+
+mod display;
+mod table;
 
 #[derive(Debug, Clone)]
 pub struct VosAST {
@@ -7,10 +11,24 @@ pub struct VosAST {
 }
 
 #[derive(Clone)]
+pub struct Position {
+    pub start: u32,
+    pub end: u32,
+    pub file: String,
+}
+
+#[derive(Clone)]
 pub enum VosStatement {
     Table(Box<TableStatement>)
 }
 
+#[derive(Debug, Clone)]
+pub struct TableStatement {
+    pub kind: TableKind,
+    pub name: String,
+    pub name_position: Position,
+    pub fields: BTreeMap<String, FieldStatement>,
+}
 
 #[derive(Debug, Clone)]
 pub enum TableKind {
@@ -31,36 +49,22 @@ pub enum TableKind {
 }
 
 #[derive(Debug, Clone)]
-pub struct TableStatement {
-    pub kind: TableKind,
+pub struct FieldStatement {
     pub name: String,
-    pub name_position: Position,
+    pub value: ValueStatement,
 }
 
-#[derive(Clone)]
-pub struct Position {
-    pub start: u32,
-    pub end: u32,
-    pub file: String,
-}
-
-impl Debug for VosStatement {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self { VosStatement::Table(v) => { Debug::fmt(v, f) } }
-    }
-}
-
-impl Debug for Position {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}:{}:{}", self.file, self.start, self.end)
-    }
+#[derive(Debug, Clone)]
+pub enum ValueStatement {
+    Default,
+    String(String)
 }
 
 impl Position {
     pub fn new(range: Range<usize>, file: &str) -> Position {
         Position {
             start: range.start as u32,
-            end: range.start as u32,
+            end: range.end as u32,
             file: file.to_string(),
         }
     }
