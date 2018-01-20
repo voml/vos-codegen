@@ -1,13 +1,19 @@
+use std::ops::Range;
+
 use peginator::{PegParser, PegPosition};
 
 use crate::{
     ast::{TableKind, TableStatement, VosAST, VosStatement},
-    parser::vos::{DeclareBodyNode, GenericNum1Token, IdentifierNode, KeyNode, VosParser, VosStatementNode},
-    FieldStatement,
+    parser::vos::{
+        DeclareBodyNode, GenericNode, GenericNum1Token, IdentifierNode, KeyNode, NamespaceNode, TypeValueNode, VosParser,
+        VosStatementNode,
+    },
+    FieldStatement, FieldTyping, GenericStatement, Namespace,
 };
 use vos_error::{VosError, VosResult};
 
 mod number;
+mod symbol;
 mod vos;
 
 struct VosVisitor {
@@ -76,12 +82,19 @@ impl VosVisitor {
         table.set_name(&id.string);
         for term in body {
             match term {
-                DeclareBodyNode::FieldStatementNode(v) => match table.add_field(v.key.as_str(), v.key.position().clone()) {
-                    Ok(_) => {}
-                    Err(e) => {
-                        todo!("重复的 key {}", e.field)
+                DeclareBodyNode::FieldStatementNode(v) => {
+                    // v.r#type.value
+                    let ns = v.r#type.name.as_namespace();
+
+                    FieldTyping { namespace: ns, generics: Default::default() };
+
+                    match table.add_field(v.key.as_str(), v.key.position().clone()) {
+                        Ok(_) => {}
+                        Err(e) => {
+                            todo!("重复的 key {}", e.field)
+                        }
                     }
-                },
+                }
                 DeclareBodyNode::KeyValueDot(_) => {}
 
                 DeclareBodyNode::Split(_) => {}

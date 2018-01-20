@@ -25,8 +25,7 @@ DeclareBodyNode = @:KeyValueDot | @:FieldStatementNode | @:Split;
 FieldStatementNode = key:KeyNode ':' type:TypeValueNode ['=' value:ValueNode];
 
 @position
-TypeValueNode = value:ValueNode [ '[' GenericNode ']' ];
-
+TypeValueNode = name:NamespaceNode [ '[' generic:GenericNode ']' ];
 
 GenericNode =
 	@:GenericNum1 |
@@ -70,10 +69,14 @@ NumNode = {'0'..'9'}+ [Dot {'0'..'9'}+];
 @string
 ModifierNode = IdentifierNode !('{'|'[');
 
+@position
+NamespaceNode = path:IdentifierNode {(Dot | '::') path:IdentifierNode};
+
 @string
 @position
 @no_skip_ws
 IdentifierNode = (XID_START | '_') {XID_CONTINUE};
+
 
 @char
 @check(unicode_ident::is_xid_start)
