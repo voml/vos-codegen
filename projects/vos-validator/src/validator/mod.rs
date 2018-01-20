@@ -2,9 +2,11 @@ use peginator::{PegParser, PegPosition};
 
 use vos_error::{VosError, VosResult};
 
-use crate::ast::{TableKind, TableStatement, VosAST, VosStatement};
-use crate::FieldStatement;
-use crate::parser::vos::{DeclareBodyNode, IdentifierNode, KeyNode, VosParser, VosStatementNode};
+use crate::{
+    ast::{TableKind, TableStatement, VosAST, VosStatement},
+    validator::vos::{DeclareBodyNode, IdentifierNode, KeyNode, VosParser, VosStatementNode},
+    FieldStatement,
+};
 
 mod vos;
 
@@ -16,7 +18,8 @@ struct VosVisitor {
 
 #[test]
 fn test() {
-    let vos = parse(r#"
+    let vos = parse(
+        r#"
 class Color {
     r: u8
 }
@@ -25,22 +28,20 @@ table Color32 {
     r: f32
 }
 
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
     println!("{:#?}", vos)
 }
 
 pub fn parse(input: &str) -> Result<VosAST, Vec<VosError>> {
-    let mut parser = VosVisitor {
-        ast: VosAST { statements: vec![] },
-        file: "".to_string(),
-        errors: vec![],
-    };
+    let mut parser = VosVisitor { ast: VosAST { statements: vec![] }, file: "".to_string(), errors: vec![] };
     if let Err(e) = parser.parse(input) {
         return Err(vec![e]);
     }
     match parser.errors.is_empty() {
-        true => { Ok(parser.ast) }
-        false => { Err(parser.errors) }
+        true => Ok(parser.ast),
+        false => Err(parser.errors),
     }
 }
 
@@ -49,7 +50,7 @@ impl VosVisitor {
         for statement in VosParser::parse(input)?.statements {
             match self.visit_statement(statement) {
                 Ok(_) => {}
-                Err(e) => { self.errors.push(e) }
+                Err(e) => self.errors.push(e),
             }
         }
         return Ok(());
@@ -74,14 +75,12 @@ impl VosVisitor {
         for term in body {
             match term {
                 DeclareBodyNode::KeyValueDot(_) => {}
-                DeclareBodyNode::KeyValueNode(v) => {
-                    match table.add_field(v.key.as_str(), v.key.position().clone()) {
-                        Ok(_) => {}
-                        Err(e) => {
-                            todo!("重复的 key {}", e.field)
-                        }
+                DeclareBodyNode::KeyValueNode(v) => match table.add_field(v.key.as_str(), v.key.position().clone()) {
+                    Ok(_) => {}
+                    Err(e) => {
+                        todo!("重复的 key {}", e.field)
                     }
-                }
+                },
                 DeclareBodyNode::Split(_) => {}
             }
         }
@@ -99,8 +98,8 @@ impl DeclareBodyNode {
 impl KeyNode {
     pub fn as_str(&self) -> String {
         match self {
-            KeyNode::IdentifierNode(v) => { v.string.to_owned() }
-            KeyNode::NumNode(v) => { v.string.to_owned() }
+            KeyNode::IdentifierNode(v) => v.string.to_owned(),
+            KeyNode::NumNode(v) => v.string.to_owned(),
         }
     }
 }

@@ -1,8 +1,10 @@
-use std::collections::BTreeMap;
-use std::fmt::{Debug, Formatter};
-use std::ops::Range;
-use crate::StringConstraint;
+use std::{
+    collections::BTreeMap,
+    fmt::{Debug, Formatter},
+    ops::Range,
+};
 
+mod define;
 mod display;
 mod table;
 
@@ -12,15 +14,8 @@ pub struct VosAST {
 }
 
 #[derive(Clone)]
-pub struct Position {
-    pub start: u32,
-    pub end: u32,
-    pub file: String,
-}
-
-#[derive(Clone)]
 pub enum VosStatement {
-    Table(Box<TableStatement>)
+    Table(Box<TableStatement>),
 }
 
 #[derive(Debug, Clone)]
@@ -51,30 +46,23 @@ pub enum TableKind {
 #[derive(Debug, Clone)]
 pub struct FieldStatement {
     pub field: String,
+    pub typing: ConstraintStatement,
     pub value: ValueStatement,
     pub range: Range<usize>,
 }
 
 #[derive(Debug, Clone)]
-pub enum ConstraintStatement {
-    String(StringConstraint)
+pub struct ConstraintStatement {
+    name: Namespace,
 }
 
-
+#[derive(Debug, Clone)]
+pub struct Namespace {
+    pub scope: Vec<String, Range<u32>>,
+}
 
 #[derive(Debug, Clone)]
 pub enum ValueStatement {
     Default,
     String(String),
-}
-
-
-impl Position {
-    pub fn new(range: Range<usize>, file: &str) -> Position {
-        Position {
-            start: range.start as u32,
-            end: range.end as u32,
-            file: file.to_string(),
-        }
-    }
 }

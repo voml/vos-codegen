@@ -24,10 +24,10 @@ pub struct StringConstraint {
 /// n: i32[=1]
 /// n: i32[<1]
 /// n: i32[1..=2]
+/// n: i32[1 < n < 2]
 /// ```
 #[derive(Debug, Clone)]
 pub struct IntegerConstraint {
-    pub unsigned: bool,
     /// Minimum length of utf8 string
     pub min: Option<BigInt>,
     /// Maximum length of utf8 string
@@ -36,6 +36,8 @@ pub struct IntegerConstraint {
     pub min_length: Option<BigInt>,
     /// Maximum number of unicode characters
     pub max_length: Option<BigInt>,
+    /// Check if number is multiple of `x`
+    pub multiple_of: Option<BigInt>,
 }
 
 #[derive(Debug, Clone)]

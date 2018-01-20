@@ -19,13 +19,34 @@ DefineStatementNode = DefineDeclare id:IdentifierNode '{' {body:DeclareBodyNode}
 DefineDeclare = 'def' | 'define' | 'fn' | 'fun' | 'function';
 
 @position
-DeclareBodyNode = @:KeyValueDot | @:KeyValueNode | @:Split;
+DeclareBodyNode = @:KeyValueDot | @:FieldStatementNode | @:Split;
 
 @position
-KeyValueNode = key:KeyNode (':'|'=') value:ValueNode;
+FieldStatementNode = key:KeyNode ':' type:TypeValueNode ['=' value:ValueNode];
 
 @position
-KeyValueDot = Dot key:KeyNode (':'|'=') value:ValueNode;
+TypeValueNode = value:ValueNode [ '[' GenericNode ']' ];
+
+
+GenericNode =
+	@:GenericNum1 |
+	@:GenericNum2 |
+	@:GenericNum3 |
+	@:IdentifierNode
+	;
+
+GenericNum1 = token:GenericNum1Token num:NumNode;
+GenericNum2 = num1:NumNode token:GenericNum2Token num2:NumNode;
+GenericNum3 = num1:NumNode token1:GenericNum1Token IdentifierNode token2:GenericNum1Token num2:NumNode;
+
+@position @string
+GenericNum1Token = '<=' | '>=' | '≤' | '≥' | '⩽' | '⩾' | '<' | '>' | '=';
+@position @string
+GenericNum2Token = '..=' | '..<';
+
+
+@position
+KeyValueDot = Dot key:KeyNode [':' value:ValueNode];
 
 @position
 KeyNode = @:IdentifierNode | @:NumNode;
@@ -43,7 +64,7 @@ Split = ';' | ',' | '，';
 @string
 @position
 @no_skip_ws
-NumNode = {'0'..'9'}+;
+NumNode = {'0'..'9'}+ [Dot {'0'..'9'}+];
 
 @position
 @string
