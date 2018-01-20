@@ -1,0 +1,63 @@
+@export
+VosParser = {statements:VosStatementNode} $;
+
+@position
+VosStatementNode =
+	@:TableDeclareNode |
+	@:StructDeclareNode ;
+
+@position
+TableDeclareNode = TableDeclare id:IdentifierNode '{' {body:DeclareBodyNode} '}';
+TableDeclare = 'table';
+
+@position
+StructDeclareNode = StructDeclare id:IdentifierNode '{' {body:DeclareBodyNode} '}';
+StructDeclare = 'class' | 'struct' | 'structure';
+
+@position
+DefineStatementNode = DefineDeclare id:IdentifierNode '{' {body:DeclareBodyNode} '}';
+DefineDeclare = 'def' | 'define' | 'fn' | 'fun' | 'function';
+
+@position
+DeclareBodyNode = @:KeyValueDot | @:KeyValueNode | @:Split;
+
+@position
+KeyValueNode = key:KeyNode (':'|'=') value:ValueNode;
+
+@position
+KeyValueDot = Dot key:KeyNode (':'|'=') value:ValueNode;
+
+@position
+KeyNode = @:IdentifierNode | @:NumNode;
+
+@position
+ValueNode = @:IdentifierNode | @:NumNode;
+
+Dot = '.' | '。';
+
+@position
+@string
+Split = ';' | ',' | '，';
+
+
+@string
+@position
+@no_skip_ws
+NumNode = {'0'..'9'}+;
+
+@position
+@string
+ModifierNode = IdentifierNode !('{'|'[');
+
+@string
+@position
+@no_skip_ws
+IdentifierNode = (XID_START | '_') {XID_CONTINUE};
+
+@char
+@check(unicode_ident::is_xid_start)
+XID_START = char;
+
+@char
+@check(unicode_ident::is_xid_continue)
+XID_CONTINUE = char;
