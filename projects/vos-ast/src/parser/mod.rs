@@ -1,18 +1,17 @@
 use std::ops::Range;
 
+use bigdecimal::BigDecimal;
+
+use crate::parser::vos::{GenericNum2, GenericNum2Token, GenericNum3};
 use peginator::{PegParser, PegPosition};
 use std::{cmp::Ordering, str::FromStr};
 
 use num::BigInt;
 
-use crate::{
-    ast::{TableKind, TableStatement, VosAST, VosStatement},
-    parser::vos::{
-        DeclareBodyNode, GenericNode, GenericNum1, GenericNum1Token, IdentifierNode, KeyNode, NamespaceNode, TypeValueNode,
-        VosParser, VosStatementNode,
-    },
-    FieldStatement, FieldTyping, GenericStatement, Namespace,
-};
+use crate::{ast::{TableKind, TableStatement, VosAST, VosStatement}, parser::vos::{
+    DeclareBodyNode, GenericNode, GenericNum1, GenericNum1Token, IdentifierNode, KeyNode, NamespaceNode, TypeValueNode,
+    VosParser, VosStatementNode,
+}, FieldStatement, FieldTyping, GenericStatement, Namespace, ValueStatement};
 use vos_error::{VosError, VosResult};
 
 mod number;
@@ -41,7 +40,7 @@ table Color32 {
 
     "#,
     )
-    .unwrap();
+        .unwrap();
     println!("{:#?}", vos)
 }
 
@@ -88,10 +87,11 @@ impl VosVisitor {
                 DeclareBodyNode::FieldStatementNode(v) => {
                     // v.r#type.value
                     let ns = v.r#type.name.as_namespace();
-
-                    FieldTyping { namespace: ns, generics: Default::default() };
-
-                    match table.add_field(v.key.as_str(), v.key.position().clone()) {
+                    let mut field = FieldStatement::default();
+                    field.field = v.key.as_identifier();
+                    field.typing = v.r#type.as_field_type()?;
+                    // field.range = v.key.as_identifier();
+                    match table.add_field(field) {
                         Ok(_) => {}
                         Err(e) => {
                             todo!("重复的 key {}", e.field)
@@ -114,7 +114,13 @@ impl DeclareBodyNode {
 }
 
 impl KeyNode {
-    pub fn as_str(&self) -> String {
+    pub fn as_identifier(&self) -> String {
+        match self {
+            KeyNode::IdentifierNode(v) => v.string.to_owned(),
+            KeyNode::NumNode(v) => v.string.to_owned(),
+        }
+    }
+    pub fn as_range(&self) -> String {
         match self {
             KeyNode::IdentifierNode(v) => v.string.to_owned(),
             KeyNode::NumNode(v) => v.string.to_owned(),

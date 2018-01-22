@@ -6,11 +6,23 @@ impl Default for TableStatement {
     }
 }
 
+impl Default for FieldStatement {
+    fn default() -> Self {
+        Self {
+            field: "".to_string(),
+            typing: FieldTyping { namespace: Default::default(), generics: Default::default() },
+            value: ValueStatement::Default,
+            range: Default::default()
+        }
+    }
+}
+
 impl Default for GenericStatement {
     fn default() -> Self {
         Self::Nothing
     }
 }
+
 impl Default for Namespace {
     fn default() -> Self {
         Self { scope: vec![] }
@@ -21,14 +33,8 @@ impl TableStatement {
     pub fn set_name(&mut self, name: &str) {
         self.name = name.to_string();
     }
-    pub fn add_field(&mut self, key: String, range: Range<usize>) -> Result<(), FieldStatement> {
-        let field = FieldStatement {
-            field: key.clone(),
-            typing: FieldTyping { namespace: Namespace { scope: vec![] }, generics: Default::default() },
-            value: ValueStatement::Default,
-            range,
-        };
-        match self.fields.insert(key, field) {
+    pub fn add_field(&mut self, field: FieldStatement) -> Result<(), FieldStatement> {
+        match self.fields.insert(field.field.to_owned(), field) {
             None => Ok(()),
             Some(s) => Err(s),
         }
@@ -45,6 +51,10 @@ impl TableStatement {
             Some(s) => Err(s),
         }
     }
+}
+
+impl FieldStatement {
+
 }
 
 impl Namespace {

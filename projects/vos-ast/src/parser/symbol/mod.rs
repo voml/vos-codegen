@@ -3,7 +3,13 @@ use bigdecimal::BigDecimal;
 use super::*;
 
 impl TypeValueNode {
-    pub fn as_generic(&self) -> VosResult<GenericStatement> {
+    pub fn as_field_type(&self) -> VosResult<FieldTyping> {
+        Ok(FieldTyping {
+            namespace: self.name.as_namespace(),
+            generics: self.as_generic()?,
+        })
+    }
+    fn as_generic(&self) -> VosResult<GenericStatement> {
         match &self.generic {
             Some(s) => s.as_generic(),
             None => Ok(GenericStatement::Nothing),
@@ -15,16 +21,13 @@ impl GenericNode {
     pub fn as_generic(&self) -> VosResult<GenericStatement> {
         match self {
             GenericNode::GenericNum1(v) => {
-                let number = BigDecimal::from_str(&v.num.string)?;
-                let (symbol, inclusive) = v.token.as_order();
-                let generic = GenericStatement::NumberBound { symbol, inclusive, number };
-                Ok(generic)
+                v.as_generic()
             }
-            GenericNode::GenericNum2(_) => {
-                todo!()
+            GenericNode::GenericNum2(v) => {
+                v.as_generic()
             }
-            GenericNode::GenericNum3(_) => {
-                todo!()
+            GenericNode::GenericNum3(v) => {
+                v.as_generic()
             }
             GenericNode::IdentifierNode(_) => {
                 todo!()
