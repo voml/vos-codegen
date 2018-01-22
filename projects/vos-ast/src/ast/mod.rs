@@ -65,7 +65,21 @@ pub struct FieldTyping {
 #[derive(Debug, Clone)]
 pub enum GenericStatement {
     Nothing,
-    NumberBound { symbol: Ordering, inclusive: bool, number: BigDecimal },
+    NumberBound {
+        symbol: Ordering,
+        inclusive: bool,
+        number: BigDecimal,
+    },
+    /// 1..=2
+    /// 1 <= n < 2
+    NumberRange {
+        min: BigDecimal,
+        min_symbol: Ordering,
+        min_inclusive: bool,
+        max: BigDecimal,
+        max_symbol: Ordering,
+        max_inclusive: bool,
+    },
 }
 
 #[derive(Debug, Clone)]

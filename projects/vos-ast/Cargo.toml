@@ -19,7 +19,7 @@ unicode-ident = "1.0.5"
 [dependencies.vos-error]
 version = "0.1.0"
 path = "../vos-error"
-features = ["num", "peginator"]
+features = ["num","bigdecimal", "peginator"]
 
 [dev-dependencies]
 

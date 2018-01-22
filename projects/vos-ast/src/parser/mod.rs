@@ -1,12 +1,15 @@
 use std::ops::Range;
 
 use peginator::{PegParser, PegPosition};
+use std::{cmp::Ordering, str::FromStr};
+
+use num::BigInt;
 
 use crate::{
     ast::{TableKind, TableStatement, VosAST, VosStatement},
     parser::vos::{
-        DeclareBodyNode, GenericNode, GenericNum1Token, IdentifierNode, KeyNode, NamespaceNode, TypeValueNode, VosParser,
-        VosStatementNode,
+        DeclareBodyNode, GenericNode, GenericNum1, GenericNum1Token, IdentifierNode, KeyNode, NamespaceNode, TypeValueNode,
+        VosParser, VosStatementNode,
     },
     FieldStatement, FieldTyping, GenericStatement, Namespace,
 };
@@ -96,7 +99,6 @@ impl VosVisitor {
                     }
                 }
                 DeclareBodyNode::KeyValueDot(_) => {}
-
                 DeclareBodyNode::Split(_) => {}
             }
         }
