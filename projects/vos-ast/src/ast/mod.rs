@@ -65,31 +65,33 @@ pub struct FieldTyping {
 #[derive(Debug, Clone)]
 pub enum GenericStatement {
     Nothing,
-    NumberBound {
-        number: BigDecimal,
-        inclusive: bool,
-    },
-    /// 1..=2
-    /// 1 <= n < 2
-    NumberRange {
-        min: BigDecimal,
-        min_inclusive: bool,
-        max: BigDecimal,
-        max_inclusive: bool,
-    },
+    NumberBound { symbol: Ordering, number: BigDecimal, inclusive: bool },
+    NumberRange { min: BigDecimal, min_inclusive: bool, max: BigDecimal, max_inclusive: bool },
 }
 
 #[derive(Debug, Clone)]
 pub struct ConstraintStatement {}
 
-#[derive(Clone)]
-pub struct Namespace {
-    pub scope: Vec<(String, Range<u32>)>,
+#[derive(Debug, Clone)]
+pub struct ValueStatement {
+    kind: ValueKind,
+    range: Range<u32>,
 }
 
-#[derive(Debug, Clone)]
-pub enum ValueStatement {
+#[derive(Clone)]
+pub enum ValueKind {
     Default,
     String(String),
     Number(BigInt),
+}
+
+#[derive(Clone)]
+pub struct Namespace {
+    pub scope: Vec<Identifier>,
+}
+
+#[derive(Clone)]
+pub struct Identifier {
+    id: String,
+    range: Range<u32>,
 }

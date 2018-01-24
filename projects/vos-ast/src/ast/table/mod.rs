@@ -11,8 +11,8 @@ impl Default for FieldStatement {
         Self {
             field: "".to_string(),
             typing: FieldTyping { namespace: Default::default(), generics: Default::default() },
-            value: ValueStatement::Default,
-            range: Default::default()
+            value: Default::default(),
+            range: Default::default(),
         }
     }
 }
@@ -20,6 +20,12 @@ impl Default for FieldStatement {
 impl Default for GenericStatement {
     fn default() -> Self {
         Self::Nothing
+    }
+}
+
+impl Default for ValueStatement {
+    fn default() -> Self {
+        Self { kind: ValueKind::Default, range: Default::default() }
     }
 }
 
@@ -43,7 +49,7 @@ impl TableStatement {
         let field = FieldStatement {
             field: key.clone(),
             typing: FieldTyping { namespace: Namespace { scope: vec![] }, generics: Default::default() },
-            value: ValueStatement::Default,
+            value: ValueStatement::default(),
             range,
         };
         match self.fields.insert(key, field) {
@@ -53,15 +59,13 @@ impl TableStatement {
     }
 }
 
-impl FieldStatement {
-
-}
+impl FieldStatement {}
 
 impl Namespace {
     pub fn new(name: String, range: Range<u32>) -> Self {
-        Self { scope: vec![(name, range)] }
+        Self { scope: vec![Identifier { id: name, range }] }
     }
-    pub fn push_id(&mut self, name: String, range: Range<u32>) {
-        self.scope.push((name, range))
+    pub fn push_identifier(&mut self, name: String, range: Range<u32>) {
+        self.scope.push(Identifier { id: name, range })
     }
 }

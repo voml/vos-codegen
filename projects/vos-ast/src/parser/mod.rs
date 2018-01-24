@@ -6,14 +6,17 @@ use crate::parser::vos::{GenericNum2, GenericNum2Token, GenericNum3};
 use peginator::{PegParser, PegPosition};
 use std::{cmp::Ordering, str::FromStr};
 
-use num::BigInt;
-
-use crate::{ast::{TableKind, TableStatement, VosAST, VosStatement}, parser::vos::{
-    DeclareBodyNode, GenericNode, GenericNum1, GenericNum1Token, IdentifierNode, KeyNode, NamespaceNode, TypeValueNode,
-    VosParser, VosStatementNode,
-}, FieldStatement, FieldTyping, GenericStatement, Namespace, ValueStatement};
+use crate::{
+    ast::{TableKind, TableStatement, VosAST, VosStatement},
+    parser::vos::{
+        DeclareBodyNode, GenericNode, GenericNum1, GenericNum1Token, IdentifierNode, KeyNode, NamespaceNode, TypeValueNode,
+        VosParser, VosStatementNode,
+    },
+    FieldStatement, FieldTyping, GenericStatement, Namespace,
+};
 use vos_error::{VosError, VosResult};
 
+mod field;
 mod number;
 mod symbol;
 mod vos;
@@ -40,7 +43,7 @@ table Color32 {
 
     "#,
     )
-        .unwrap();
+    .unwrap();
     println!("{:#?}", vos)
 }
 
@@ -84,32 +87,18 @@ impl VosVisitor {
         table.set_name(&id.string);
         for term in body {
             match term {
-                DeclareBodyNode::FieldStatementNode(v) => {
-                    // v.r#type.value
-                    let ns = v.r#type.name.as_namespace();
-                    let mut field = FieldStatement::default();
-                    field.field = v.key.as_identifier();
-                    field.typing = v.r#type.as_field_type()?;
-                    // field.range = v.key.as_identifier();
-                    match table.add_field(field) {
-                        Ok(_) => {}
-                        Err(e) => {
-                            todo!("重复的 key {}", e.field)
-                        }
+                DeclareBodyNode::FieldStatementNode(v) => match table.add_field(v.as_field()?) {
+                    Ok(_) => {}
+                    Err(e) => {
+                        todo!("重复的 key {}", e.field)
                     }
-                }
+                },
                 DeclareBodyNode::KeyValueDot(_) => {}
                 DeclareBodyNode::Split(_) => {}
             }
         }
         self.ast.statements.push(VosStatement::Table(Box::new(table)));
         Ok(())
-    }
-}
-
-impl DeclareBodyNode {
-    fn visit(self, visitor: &mut VosVisitor) -> VosResult<FieldStatement> {
-        todo!()
     }
 }
 

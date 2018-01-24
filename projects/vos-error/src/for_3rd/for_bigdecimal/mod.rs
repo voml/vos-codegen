@@ -1,6 +1,5 @@
 use crate::{VosError, VosErrorKind};
 use bigdecimal::ParseBigDecimalError;
-use std::ops::Range;
 
 impl From<ParseBigDecimalError> for VosError {
     fn from(error: ParseBigDecimalError) -> Self {
