@@ -1,24 +1,24 @@
-use std::ops::Range;
+use std::{cmp::Ordering, ops::Range, str::FromStr};
 
 use bigdecimal::BigDecimal;
-
-use crate::parser::vos::{GenericNum2, GenericNum2Token, GenericNum3};
 use peginator::{PegParser, PegPosition};
-use std::{cmp::Ordering, str::FromStr};
+
+use vos_error::{VosError, VosResult};
 
 use crate::{
     ast::{TableKind, TableStatement, VosAST, VosStatement},
     parser::vos::{
-        DeclareBodyNode, GenericNode, GenericNum1, GenericNum1Token, IdentifierNode, KeyNode, NamespaceNode, TypeValueNode,
-        VosParser, VosStatementNode,
+        BooleanNode, DeclareBodyNode, DefaultNode, FieldStatementNode, GenericNode, GenericNum1, GenericNum1Token, GenericNum2,
+        GenericNum2Token, GenericNum3, IdentifierNode, KeyNode, NamespaceNode, NumNode, TypeValueNode, ValueNode, VosParser,
+        VosStatementNode,
     },
-    FieldStatement, FieldTyping, GenericStatement, Namespace,
+    FieldStatement, FieldTyping, GenericStatement, Namespace, ValueKind, ValueStatement,
 };
-use vos_error::{VosError, VosResult};
 
 mod field;
 mod number;
 mod symbol;
+mod value;
 mod vos;
 
 struct VosVisitor {
@@ -56,6 +56,10 @@ pub fn parse(input: &str) -> Result<VosAST, Vec<VosError>> {
         true => Ok(parser.ast),
         false => Err(parser.errors),
     }
+}
+
+pub fn as_range(range: &Range<usize>) -> Range<u32> {
+    Range { start: range.start as u32, end: range.end as u32 }
 }
 
 impl VosVisitor {
@@ -104,12 +108,6 @@ impl VosVisitor {
 
 impl KeyNode {
     pub fn as_identifier(&self) -> String {
-        match self {
-            KeyNode::IdentifierNode(v) => v.string.to_owned(),
-            KeyNode::NumNode(v) => v.string.to_owned(),
-        }
-    }
-    pub fn as_range(&self) -> String {
         match self {
             KeyNode::IdentifierNode(v) => v.string.to_owned(),
             KeyNode::NumNode(v) => v.string.to_owned(),

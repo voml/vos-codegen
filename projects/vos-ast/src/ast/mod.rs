@@ -53,7 +53,6 @@ pub struct FieldStatement {
     pub field: String,
     pub typing: FieldTyping,
     pub value: ValueStatement,
-    pub range: Range<usize>,
 }
 
 #[derive(Debug, Clone)]
@@ -74,15 +73,16 @@ pub struct ConstraintStatement {}
 
 #[derive(Debug, Clone)]
 pub struct ValueStatement {
-    kind: ValueKind,
-    range: Range<u32>,
+    pub kind: ValueKind,
+    pub range: Range<u32>,
 }
 
 #[derive(Clone)]
 pub enum ValueKind {
     Default,
+    Boolean(bool),
     String(String),
-    Number(BigInt),
+    Number(BigDecimal),
 }
 
 #[derive(Clone)]

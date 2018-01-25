@@ -12,7 +12,6 @@ impl Default for FieldStatement {
             field: "".to_string(),
             typing: FieldTyping { namespace: Default::default(), generics: Default::default() },
             value: Default::default(),
-            range: Default::default(),
         }
     }
 }
@@ -50,7 +49,6 @@ impl TableStatement {
             field: key.clone(),
             typing: FieldTyping { namespace: Namespace { scope: vec![] }, generics: Default::default() },
             value: ValueStatement::default(),
-            range,
         };
         match self.fields.insert(key, field) {
             None => Ok(()),

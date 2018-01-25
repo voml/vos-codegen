@@ -29,7 +29,7 @@ impl NamespaceNode {
     pub fn as_namespace(&self) -> Namespace {
         let mut ns = Namespace::default();
         for id in &self.path {
-            ns.push_identifier(id.as_symbol(), id.as_range())
+            ns.push_identifier(id.as_symbol(), as_range(&id.position))
         }
         ns
     }
@@ -38,8 +38,5 @@ impl NamespaceNode {
 impl IdentifierNode {
     pub fn as_symbol(&self) -> String {
         self.string.to_string()
-    }
-    pub fn as_range(&self) -> Range<u32> {
-        Range { start: self.position.start as u32, end: self.position.end as u32 }
     }
 }

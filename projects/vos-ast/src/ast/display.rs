@@ -14,8 +14,8 @@ impl Debug for ValueKind {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             ValueKind::Default => f.write_str("default"),
+            ValueKind::Boolean(v) => write!(f, "{}", v),
             ValueKind::String(v) => write!(f, "{:?}", v),
-
             ValueKind::Number(v) => write!(f, "{}", v),
         }
     }
