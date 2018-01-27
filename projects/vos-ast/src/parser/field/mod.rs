@@ -1,4 +1,5 @@
 use super::*;
+use crate::ConstraintStatement;
 
 impl FieldStatementNode {
     pub fn as_field(&self) -> VosResult<FieldStatement> {
@@ -11,11 +12,11 @@ impl FieldStatementNode {
         }
         Ok(field)
     }
-    fn as_value(&self) -> VosResult<ValueStatement> {
-        match &self.value {
-            Some(s) => s.as_value(),
-            None => Ok(ValueStatement::default()),
-        }
+}
+
+impl ConstraintStatementNode {
+    pub fn as_constraint(&self) -> VosResult<ConstraintStatement> {
+        Ok(ConstraintStatement {})
     }
 }
 
@@ -24,7 +25,7 @@ impl ValueNode {
         match self {
             ValueNode::DefaultNode(v) => Ok(v.as_value()),
             ValueNode::BooleanNode(v) => Ok(v.as_value()),
-            ValueNode::IdentifierNode(_) => {
+            ValueNode::NamespaceNode(v) => {
                 todo!()
             }
             ValueNode::NumNode(v) => {

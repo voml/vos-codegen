@@ -59,6 +59,18 @@ impl TableStatement {
 
 impl FieldStatement {}
 
+impl GenericStatement {
+    pub fn operator(order: Ordering, inclusive: bool) -> char {
+        match order {
+            Ordering::Less if inclusive => '⩽',
+            Ordering::Less => '<',
+            Ordering::Equal => '=',
+            Ordering::Greater if inclusive => '⩾',
+            Ordering::Greater => '>',
+        }
+    }
+}
+
 impl Namespace {
     pub fn new(name: String, range: Range<u32>) -> Self {
         Self { scope: vec![Identifier { id: name, range }] }

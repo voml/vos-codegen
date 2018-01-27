@@ -42,7 +42,7 @@ impl GenericNum1Token {
             ">" => (Ordering::Greater, false),
             ">=" | "⩾" | "≥" => (Ordering::Greater, true),
             "<" => (Ordering::Less, false),
-            "<=" | "≤" | "⩽" => (Ordering::Less, true),
+            "<=" | "⩽" | "≤" => (Ordering::Less, true),
             "=" | _ => (Ordering::Equal, true),
         }
     }

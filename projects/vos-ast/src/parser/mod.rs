@@ -35,12 +35,11 @@ class Color {
     r: u8[<=9],
     g: u8[1..=2],
     b: u8[1<b<2],
+    a: f32,
 }
-
-table Color32 {
-    r: f32,
+table Nest {
+    a: List[u8]
 }
-
     "#,
     )
     .unwrap();
@@ -97,7 +96,7 @@ impl VosVisitor {
                         todo!("重复的 key {}", e.field)
                     }
                 },
-                DeclareBodyNode::KeyValueDot(_) => {}
+                DeclareBodyNode::ConstraintStatementNode(v) => table.add_field(v.as_constraint()?),
                 DeclareBodyNode::Split(_) => {}
             }
         }

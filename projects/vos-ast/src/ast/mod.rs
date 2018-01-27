@@ -6,8 +6,8 @@ use std::{
 };
 
 use bigdecimal::BigDecimal;
-use num::BigInt;
 
+mod constraint;
 mod define;
 mod display;
 mod table;
@@ -48,20 +48,20 @@ pub enum TableKind {
     Table,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct FieldStatement {
     pub field: String,
     pub typing: FieldTyping,
     pub value: ValueStatement,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct FieldTyping {
     pub namespace: Namespace,
     pub generics: GenericStatement,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, PartialEq)]
 pub enum GenericStatement {
     Nothing,
     NumberBound { symbol: Ordering, number: BigDecimal, inclusive: bool },
@@ -77,7 +77,7 @@ pub struct ValueStatement {
     pub range: Range<u32>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub enum ValueKind {
     Default,
     Boolean(bool),

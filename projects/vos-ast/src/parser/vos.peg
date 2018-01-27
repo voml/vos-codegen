@@ -19,7 +19,7 @@ DefineStatementNode = DefineDeclare id:IdentifierNode '{' {body:DeclareBodyNode}
 DefineDeclare = 'def' | 'define' | 'fn' | 'fun' | 'function';
 
 @position
-DeclareBodyNode = @:KeyValueDot | @:FieldStatementNode | @:Split;
+DeclareBodyNode = @:ConstraintStatementNode | @:FieldStatementNode | @:Split;
 
 @position
 FieldStatementNode = key:KeyNode ':' type:TypeValueNode ['=' value:ValueNode];
@@ -45,7 +45,7 @@ GenericNum2Token = '..=' | '..<';
 
 
 @position
-KeyValueDot = Dot key:KeyNode [':' value:ValueNode];
+ConstraintStatementNode = Dot key:KeyNode [':' value:ValueNode];
 
 @position
 KeyNode = @:IdentifierNode | @:NumNode;
@@ -55,7 +55,7 @@ ValueNode =
 	@:DefaultNode |
 	@:BooleanNode |
 	@:NumNode |
-	@:IdentifierNode
+	@:NamespaceNode
 	;
 
 Dot = '.' | '。';
