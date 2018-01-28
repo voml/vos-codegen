@@ -2,6 +2,12 @@ use std::fmt::Display;
 
 use super::*;
 
+impl Debug for VosAST {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_list().entries(self.statements.iter()).finish()
+    }
+}
+
 impl Debug for VosStatement {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -27,6 +33,7 @@ impl Debug for GenericStatement {
                     max
                 )
             }
+            GenericStatement::Arguments { arguments } => f.debug_list().entries(arguments.iter()).finish(),
         }
     }
 }
@@ -36,7 +43,7 @@ impl Debug for FieldStatement {
         let mut w = &mut f.debug_struct("FieldStatement");
         w = w.field("type", &self.typing);
         if self.value.kind != ValueKind::Default {
-            w = w.field("value", &self.value)
+            w = w.field("value", &self.value.kind)
         }
         w.finish()
     }
@@ -58,6 +65,7 @@ impl Debug for ValueKind {
             ValueKind::Boolean(v) => write!(f, "{}", v),
             ValueKind::String(v) => write!(f, "{:?}", v),
             ValueKind::Number(v) => write!(f, "{}", v),
+            ValueKind::Symbol(v) => write!(f, "{}", v),
         }
     }
 }

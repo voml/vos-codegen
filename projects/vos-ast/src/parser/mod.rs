@@ -1,18 +1,18 @@
 use std::{cmp::Ordering, ops::Range, str::FromStr};
 
 use bigdecimal::BigDecimal;
-use peginator::{PegParser, PegPosition};
+use peginator::PegParser;
 
 use vos_error::{VosError, VosResult};
 
 use crate::{
     ast::{TableKind, TableStatement, VosAST, VosStatement},
     parser::vos::{
-        BooleanNode, DeclareBodyNode, DefaultNode, FieldStatementNode, GenericNode, GenericNum1, GenericNum1Token, GenericNum2,
-        GenericNum2Token, GenericNum3, IdentifierNode, KeyNode, NamespaceNode, NumNode, TypeValueNode, ValueNode, VosParser,
-        VosStatementNode,
+        BooleanNode, ConstraintStatementNode, DeclareBodyNode, DefaultNode, FieldStatementNode, GenericNode, GenericNum1,
+        GenericNum1Token, GenericNum2, GenericNum2Token, GenericNum3, IdentifierNode, KeyNode, NamespaceNode, NumNode,
+        TypeValueNode, ValueNode, VosParser, VosStatementNode,
     },
-    FieldStatement, FieldTyping, GenericStatement, Namespace, ValueKind, ValueStatement,
+    ConstraintStatement, FieldStatement, FieldTyping, GenericStatement, Identifier, Namespace, ValueKind, ValueStatement,
 };
 
 mod field;
@@ -25,25 +25,6 @@ struct VosVisitor {
     ast: VosAST,
     file: String,
     errors: Vec<VosError>,
-}
-
-#[test]
-fn test() {
-    let vos = parse(
-        r#"
-class Color {
-    r: u8[<=9],
-    g: u8[1..=2],
-    b: u8[1<b<2],
-    a: f32,
-}
-table Nest {
-    a: List[u8]
-}
-    "#,
-    )
-    .unwrap();
-    println!("{:#?}", vos)
 }
 
 pub fn parse(input: &str) -> Result<VosAST, Vec<VosError>> {
@@ -59,6 +40,12 @@ pub fn parse(input: &str) -> Result<VosAST, Vec<VosError>> {
 
 pub fn as_range(range: &Range<usize>) -> Range<u32> {
     Range { start: range.start as u32, end: range.end as u32 }
+}
+fn as_value(v: &Option<ValueNode>) -> VosResult<ValueStatement> {
+    match v {
+        Some(s) => s.as_value(),
+        None => Ok(ValueStatement::default()),
+    }
 }
 
 impl VosVisitor {
@@ -87,16 +74,16 @@ impl VosVisitor {
         Ok(())
     }
     fn push_table(&mut self, mut table: TableStatement, id: IdentifierNode, body: Vec<DeclareBodyNode>) -> VosResult {
-        table.set_name(&id.string);
+        table.name = id.as_identifier();
         for term in body {
             match term {
                 DeclareBodyNode::FieldStatementNode(v) => match table.add_field(v.as_field()?) {
                     Ok(_) => {}
                     Err(e) => {
-                        todo!("重复的 key {}", e.field)
+                        todo!("重复的 key {}", e.name)
                     }
                 },
-                DeclareBodyNode::ConstraintStatementNode(v) => table.add_field(v.as_constraint()?),
+                DeclareBodyNode::ConstraintStatementNode(v) => table.add_constraint(v.as_constraint()?),
                 DeclareBodyNode::Split(_) => {}
             }
         }
@@ -106,10 +93,10 @@ impl VosVisitor {
 }
 
 impl KeyNode {
-    pub fn as_identifier(&self) -> String {
+    pub fn as_identifier(&self) -> Identifier {
         match self {
-            KeyNode::IdentifierNode(v) => v.string.to_owned(),
-            KeyNode::NumNode(v) => v.string.to_owned(),
+            KeyNode::IdentifierNode(v) => v.as_identifier(),
+            KeyNode::NumNode(_) => Identifier::default(),
         }
     }
 }

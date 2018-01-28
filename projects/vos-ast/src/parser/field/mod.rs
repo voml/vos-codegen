@@ -1,22 +1,18 @@
 use super::*;
-use crate::ConstraintStatement;
 
 impl FieldStatementNode {
     pub fn as_field(&self) -> VosResult<FieldStatement> {
         let mut field = FieldStatement::default();
-        field.field = self.key.as_identifier();
+        field.name = self.key.as_identifier();
         field.typing = self.r#type.as_field_type()?;
-        match &self.value {
-            Some(s) => field.value = s.as_value()?,
-            None => {}
-        }
+        field.value = as_value(&self.value)?;
         Ok(field)
     }
 }
 
 impl ConstraintStatementNode {
     pub fn as_constraint(&self) -> VosResult<ConstraintStatement> {
-        Ok(ConstraintStatement {})
+        Ok(ConstraintStatement { name: self.key.as_identifier(), value: as_value(&self.value)? })
     }
 }
 
@@ -25,12 +21,8 @@ impl ValueNode {
         match self {
             ValueNode::DefaultNode(v) => Ok(v.as_value()),
             ValueNode::BooleanNode(v) => Ok(v.as_value()),
-            ValueNode::NamespaceNode(v) => {
-                todo!()
-            }
-            ValueNode::NumNode(v) => {
-                todo!()
-            }
+            ValueNode::NumNode(v) => v.as_value(),
+            ValueNode::NamespaceNode(v) => Ok(v.as_value()),
         }
     }
 }
@@ -59,5 +51,22 @@ impl NumNode {
     }
     pub fn as_value(&self) -> VosResult<ValueStatement> {
         Ok(ValueStatement { kind: ValueKind::Number(self.as_num()?), range: as_range(&self.position) })
+    }
+}
+
+impl NamespaceNode {
+    pub fn as_namespace(&self) -> Namespace {
+        let mut ns = Namespace::default();
+        for id in &self.path {
+            ns.push_identifier(id.as_string(), as_range(&id.position))
+        }
+        ns
+    }
+    pub fn as_value(&self) -> ValueStatement {
+        ValueStatement { kind: ValueKind::Symbol(self.as_namespace()), range: as_range(&self.position) }
+    }
+    pub fn as_generic(&self) -> VosResult<GenericStatement> {
+        let generic = GenericStatement::Arguments { arguments: vec![] };
+        Ok(generic)
     }
 }

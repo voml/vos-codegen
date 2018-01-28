@@ -18,25 +18,16 @@ impl GenericNode {
             GenericNode::GenericNum1(v) => v.as_generic(),
             GenericNode::GenericNum2(v) => v.as_generic(),
             GenericNode::GenericNum3(v) => v.as_generic(),
-            GenericNode::IdentifierNode(_) => {
-                todo!()
-            }
+            GenericNode::NamespaceNode(v) => v.as_generic(),
         }
-    }
-}
-
-impl NamespaceNode {
-    pub fn as_namespace(&self) -> Namespace {
-        let mut ns = Namespace::default();
-        for id in &self.path {
-            ns.push_identifier(id.as_symbol(), as_range(&id.position))
-        }
-        ns
     }
 }
 
 impl IdentifierNode {
-    pub fn as_symbol(&self) -> String {
+    pub fn as_string(&self) -> String {
         self.string.to_string()
+    }
+    pub fn as_identifier(&self) -> Identifier {
+        Identifier { id: self.as_string(), range: as_range(&self.position) }
     }
 }

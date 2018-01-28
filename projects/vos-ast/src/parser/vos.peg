@@ -18,7 +18,6 @@ StructDeclare = 'class' | 'struct' | 'structure';
 DefineStatementNode = DefineDeclare id:IdentifierNode '{' {body:DeclareBodyNode} '}';
 DefineDeclare = 'def' | 'define' | 'fn' | 'fun' | 'function';
 
-@position
 DeclareBodyNode = @:ConstraintStatementNode | @:FieldStatementNode | @:Split;
 
 @position
@@ -31,7 +30,7 @@ GenericNode =
 	@:GenericNum1 |
 	@:GenericNum2 |
 	@:GenericNum3 |
-	@:IdentifierNode
+	@:NamespaceNode
 	;
 
 GenericNum1 = token:GenericNum1Token num:NumNode;
@@ -45,24 +44,23 @@ GenericNum2Token = '..=' | '..<';
 
 
 @position
-ConstraintStatementNode = Dot key:KeyNode [':' value:ValueNode];
+ConstraintStatementNode = '^' key:KeyNode [':' value:ValueNode];
 
 @position
 KeyNode = @:IdentifierNode | @:NumNode;
 
-@position
 ValueNode =
-	@:DefaultNode |
-	@:BooleanNode |
+	@:ListNode |
+	@:SpecialNode |
 	@:NumNode |
 	@:NamespaceNode
 	;
 
-Dot = '.' | '。';
+ListNode =
+	'[' {items:ListItem} ']' |
+	'{' {items:ListItem} '}' ;
 
-@position
-@string
-Split = ';' | ',' | '，';
+ListItem = @:ValueNode | @:Split;
 
 
 @string
@@ -84,11 +82,8 @@ IdentifierNode = (XID_START | '_') {XID_CONTINUE};
 
 @string
 @position
-DefaultNode = 'null' | 'default';
+SpecialNode = 'null' | 'default' | 'true' | 'false';
 
-@string
-@position
-BooleanNode = 'true' | 'false';
 
 @char
 @check(unicode_ident::is_xid_start)
@@ -97,3 +92,9 @@ XID_START = char;
 @char
 @check(unicode_ident::is_xid_continue)
 XID_CONTINUE = char;
+
+@char
+Dot = '.' | '。';
+
+@char
+Split = ';' | ',' | '，';

@@ -1,18 +1,8 @@
 use super::*;
 
-impl Default for TableStatement {
+impl Default for TableKind {
     fn default() -> Self {
-        Self { kind: TableKind::Structure, name: "".to_string(), fields: Default::default(), constraints: Default::default() }
-    }
-}
-
-impl Default for FieldStatement {
-    fn default() -> Self {
-        Self {
-            field: "".to_string(),
-            typing: FieldTyping { namespace: Default::default(), generics: Default::default() },
-            value: Default::default(),
-        }
+        Self::Table
     }
 }
 
@@ -22,38 +12,15 @@ impl Default for GenericStatement {
     }
 }
 
-impl Default for ValueStatement {
-    fn default() -> Self {
-        Self { kind: ValueKind::Default, range: Default::default() }
-    }
-}
-
-impl Default for Namespace {
-    fn default() -> Self {
-        Self { scope: vec![] }
-    }
-}
-
 impl TableStatement {
-    pub fn set_name(&mut self, name: &str) {
-        self.name = name.to_string();
-    }
     pub fn add_field(&mut self, field: FieldStatement) -> Result<(), FieldStatement> {
-        match self.fields.insert(field.field.to_owned(), field) {
+        match self.fields.insert(field.name.to_string(), field) {
             None => Ok(()),
             Some(s) => Err(s),
         }
     }
-    pub fn add_constraint(&mut self, key: String, range: Range<usize>) -> Result<(), FieldStatement> {
-        let field = FieldStatement {
-            field: key.clone(),
-            typing: FieldTyping { namespace: Namespace { scope: vec![] }, generics: Default::default() },
-            value: ValueStatement::default(),
-        };
-        match self.fields.insert(key, field) {
-            None => Ok(()),
-            Some(s) => Err(s),
-        }
+    pub fn add_constraint(&mut self, constraint: ConstraintStatement) {
+        self.constraints.insert(constraint.name.to_string(), constraint);
     }
 }
 
@@ -79,3 +46,5 @@ impl Namespace {
         self.scope.push(Identifier { id: name, range })
     }
 }
+
+impl Identifier {}

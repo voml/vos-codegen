@@ -11,8 +11,9 @@ mod constraint;
 mod define;
 mod display;
 mod table;
+mod value;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct VosAST {
     pub statements: Vec<VosStatement>,
 }
@@ -22,10 +23,10 @@ pub enum VosStatement {
     Table(Box<TableStatement>),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct TableStatement {
     pub kind: TableKind,
-    pub name: String,
+    pub name: Identifier,
     pub fields: BTreeMap<String, FieldStatement>,
     pub constraints: BTreeMap<String, ConstraintStatement>,
 }
@@ -48,14 +49,14 @@ pub enum TableKind {
     Table,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct FieldStatement {
-    pub field: String,
+    pub name: Identifier,
     pub typing: FieldTyping,
     pub value: ValueStatement,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct FieldTyping {
     pub namespace: Namespace,
     pub generics: GenericStatement,
@@ -66,12 +67,16 @@ pub enum GenericStatement {
     Nothing,
     NumberBound { symbol: Ordering, number: BigDecimal, inclusive: bool },
     NumberRange { min: BigDecimal, min_inclusive: bool, max: BigDecimal, max_inclusive: bool },
+    Arguments { arguments: Vec<ValueStatement> },
 }
 
 #[derive(Debug, Clone)]
-pub struct ConstraintStatement {}
+pub struct ConstraintStatement {
+    pub name: Identifier,
+    pub value: ValueStatement,
+}
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct ValueStatement {
     pub kind: ValueKind,
     pub range: Range<u32>,
@@ -83,15 +88,16 @@ pub enum ValueKind {
     Boolean(bool),
     String(String),
     Number(BigDecimal),
+    Symbol(Namespace),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default, PartialEq)]
 pub struct Namespace {
     pub scope: Vec<Identifier>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct Identifier {
-    id: String,
-    range: Range<u32>,
+    pub id: String,
+    pub range: Range<u32>,
 }
