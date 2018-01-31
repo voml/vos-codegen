@@ -42,9 +42,7 @@ impl Debug for FieldStatement {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut w = &mut f.debug_struct("FieldStatement");
         w = w.field("type", &self.typing);
-        if self.value.kind != ValueKind::Default {
-            w = w.field("value", &self.value.kind)
-        }
+        w = w.field("value", &self.value);
         w.finish()
     }
 }
@@ -58,6 +56,12 @@ impl Debug for FieldTyping {
     }
 }
 
+impl Debug for ValueStatement {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        Debug::fmt(&self.kind, f)
+    }
+}
+
 impl Debug for ValueKind {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -66,6 +70,8 @@ impl Debug for ValueKind {
             ValueKind::String(v) => write!(f, "{:?}", v),
             ValueKind::Number(v) => write!(f, "{}", v),
             ValueKind::Symbol(v) => write!(f, "{}", v),
+            ValueKind::List(v) => f.debug_list().entries(v.iter()).finish(),
+            ValueKind::Dict(v) => f.debug_map().entries(v.iter()).finish(),
         }
     }
 }

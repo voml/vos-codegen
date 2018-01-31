@@ -6,6 +6,7 @@ use std::{
 };
 
 use bigdecimal::BigDecimal;
+use indexmap::IndexMap;
 
 mod constraint;
 mod define;
@@ -27,7 +28,7 @@ pub enum VosStatement {
 pub struct TableStatement {
     pub kind: TableKind,
     pub name: Identifier,
-    pub fields: BTreeMap<String, FieldStatement>,
+    pub fields: IndexMap<String, FieldStatement>,
     pub constraints: BTreeMap<String, ConstraintStatement>,
 }
 
@@ -76,7 +77,7 @@ pub struct ConstraintStatement {
     pub value: ValueStatement,
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Clone, Default)]
 pub struct ValueStatement {
     pub kind: ValueKind,
     pub range: Range<u32>,
@@ -89,6 +90,8 @@ pub enum ValueKind {
     String(String),
     Number(BigDecimal),
     Symbol(Namespace),
+    List(Vec<ValueStatement>),
+    Dict(IndexMap<String, ValueStatement>),
 }
 
 #[derive(Clone, Default, PartialEq)]

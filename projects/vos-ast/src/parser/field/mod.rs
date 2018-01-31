@@ -1,3 +1,8 @@
+use indexmap::IndexMap;
+use peginator::PegPosition;
+
+use crate::parser::vos::{DictItem, ListItem, SpecialNode};
+
 use super::*;
 
 impl FieldStatementNode {
@@ -19,29 +24,48 @@ impl ConstraintStatementNode {
 impl ValueNode {
     pub fn as_value(&self) -> VosResult<ValueStatement> {
         match self {
-            ValueNode::DefaultNode(v) => Ok(v.as_value()),
-            ValueNode::BooleanNode(v) => Ok(v.as_value()),
+            ValueNode::SpecialNode(v) => Ok(v.as_value()),
             ValueNode::NumNode(v) => v.as_value(),
             ValueNode::NamespaceNode(v) => Ok(v.as_value()),
+            ValueNode::ListNode(v) => {
+                let mut out = vec![];
+                for item in &v.items {
+                    match item {
+                        ListItem::ValueNode(v) => out.push(v.as_value()?),
+                        ListItem::Split(_) => {}
+                    }
+                }
+                Ok(ValueStatement { kind: ValueKind::List(out), range: as_range(v.position()) })
+            }
+            ValueNode::DictNode(v) => {
+                let mut out = IndexMap::default();
+                for item in &v.items {
+                    match item {
+                        DictItem::KeyValueNode(v) => {
+                            let key = v.key.as_identifier().id;
+                            let value = v.value.as_value()?;
+                            match out.insert(key, value) {
+                                None => {}
+                                Some(_) => {}
+                            }
+                        }
+                        DictItem::Split(_) => {}
+                    }
+                }
+                Ok(ValueStatement { kind: ValueKind::Dict(out), range: as_range(v.position()) })
+            }
         }
     }
 }
 
-impl DefaultNode {
+impl SpecialNode {
     pub fn as_value(&self) -> ValueStatement {
-        ValueStatement { kind: ValueKind::Default, range: as_range(&self.position) }
-    }
-}
-
-impl BooleanNode {
-    pub fn as_bool(&self) -> bool {
-        match self.string.as_str() {
-            "true" => true,
-            _ => false,
-        }
-    }
-    pub fn as_value(&self) -> ValueStatement {
-        ValueStatement { kind: ValueKind::Boolean(self.as_bool()), range: as_range(&self.position) }
+        let kind = match self.string.as_str() {
+            "true" => ValueKind::Boolean(true),
+            "false" => ValueKind::Boolean(false),
+            _ => ValueKind::Default,
+        };
+        ValueStatement { kind, range: as_range(&self.position) }
     }
 }
 

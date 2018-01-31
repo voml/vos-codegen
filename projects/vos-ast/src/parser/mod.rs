@@ -8,9 +8,9 @@ use vos_error::{VosError, VosResult};
 use crate::{
     ast::{TableKind, TableStatement, VosAST, VosStatement},
     parser::vos::{
-        BooleanNode, ConstraintStatementNode, DeclareBodyNode, DefaultNode, FieldStatementNode, GenericNode, GenericNum1,
-        GenericNum1Token, GenericNum2, GenericNum2Token, GenericNum3, IdentifierNode, KeyNode, NamespaceNode, NumNode,
-        TypeValueNode, ValueNode, VosParser, VosStatementNode,
+        ConstraintStatementNode, DeclareBodyNode, FieldStatementNode, GenericNode, GenericNum1, GenericNum1Token, GenericNum2,
+        GenericNum2Token, GenericNum3, IdentifierNode, KeyNode, NamespaceNode, NumNode, TypeValueNode, ValueNode, VosParser,
+        VosStatementNode,
     },
     ConstraintStatement, FieldStatement, FieldTyping, GenericStatement, Identifier, Namespace, ValueKind, ValueStatement,
 };

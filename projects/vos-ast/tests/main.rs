@@ -17,8 +17,8 @@ class Color {
 }
 table Nest {
     color: Color = Red;
-    ^require: 1
-    ^require: 2
+    ^require: [1, [2]]
+    ^require: {a: 1}
 }
     "#,
     )

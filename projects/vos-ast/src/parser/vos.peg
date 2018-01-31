@@ -50,17 +50,28 @@ ConstraintStatementNode = '^' key:KeyNode [':' value:ValueNode];
 KeyNode = @:IdentifierNode | @:NumNode;
 
 ValueNode =
+	@:DictNode |
 	@:ListNode |
 	@:SpecialNode |
 	@:NumNode |
 	@:NamespaceNode
 	;
 
+@position
+DictNode = '{' {items:DictItem} '}' ;
+
+DictItem = @:KeyValueNode | @:Split;
+
+KeyValueNode = key:KeyNode ':' value:ValueNode;
+
+
+@position
 ListNode =
 	'[' {items:ListItem} ']' |
 	'{' {items:ListItem} '}' ;
 
 ListItem = @:ValueNode | @:Split;
+
 
 
 @string
