@@ -1,6 +1,6 @@
 [package]
 name = "vos-error"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Aster <192607617@qq.com>"]
 description = "Virtual Object Schema shared error types"
 repository = "https://github.com/oovm/sub_projects"

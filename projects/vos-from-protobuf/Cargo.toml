@@ -1,6 +1,6 @@
 [package]
-name = "vos-ast"
-version = "0.1.0"
+name = "vos-from-protobuf"
+version = "0.0.0"
 authors = ["Aster <192607617@qq.com>"]
 description = "..."
 repository = "https://github.com/oovm/sub_projects"
@@ -11,14 +11,13 @@ edition = "2021"
 
 [dependencies]
 indexmap = "1.9.1"
+vos-ast = "0.0.0"
 num = "0.4.0"
-bigdecimal = "0.3.0"
-peginator = "0.3.0"
-unicode-ident = "1.0.5"
+quick-protobuf = "0.8.0"
 
 [dependencies.vos-error]
-version = "0.1.1"
-features = ["bigdecimal", "peginator"]
+version= "0.1.1"
+features = ["num"]
 
 [dev-dependencies]
 
@@ -27,4 +26,3 @@ peginator = "0.3.0"
 
 [features]
 default = []
-
