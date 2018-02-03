@@ -1,10 +1,12 @@
 @export
 VosParser = {statements:VosStatementNode} $;
 
-@position
 VosStatementNode =
 	@:TableDeclareNode |
-	@:StructDeclareNode ;
+	@:StructDeclareNode |
+	@:ObjectStatementNode |
+	@:UnionStatementNode |
+	@:Split;
 
 @position
 TableDeclareNode = TableDeclare id:IdentifierNode '{' {body:DeclareBodyNode} '}';
@@ -18,10 +20,22 @@ StructDeclare = 'class' | 'struct' | 'structure';
 DefineStatementNode = DefineDeclare id:IdentifierNode '{' {body:DeclareBodyNode} '}';
 DefineDeclare = 'def' | 'define' | 'fn' | 'fun' | 'function';
 
+@position
+UnionStatementNode = UnionDeclare id:IdentifierNode '{' {body:UnionBodyNode} '}';
+UnionDeclare = 'union' | "enum" | 'enumerate' | 'tagged';
+
+@position
+ObjectStatementNode = ObjectDeclare id:IdentifierNode '=' value:ValueNode;
+ObjectDeclare = 'let' | "var" | 'const' | 'object';
+
 DeclareBodyNode = @:ConstraintStatementNode | @:FieldStatementNode | @:Split;
+
+UnionBodyNode = id:IdentifierNode '=' n:ValueNode;
 
 @position
 FieldStatementNode = key:KeyNode ':' type:TypeValueNode ['=' value:ValueNode];
+
+
 
 @position
 TypeValueNode = name:NamespaceNode [ '[' generic:GenericNode ']' ];

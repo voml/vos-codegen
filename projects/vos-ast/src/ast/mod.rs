@@ -22,6 +22,7 @@ pub struct VosAST {
 #[derive(Clone)]
 pub enum VosStatement {
     Table(Box<TableStatement>),
+    Object(Box<ObjectStatement>),
 }
 
 #[derive(Clone, Debug, Default)]
@@ -30,6 +31,12 @@ pub struct TableStatement {
     pub name: Identifier,
     pub fields: IndexMap<String, FieldStatement>,
     pub constraints: BTreeMap<String, ConstraintStatement>,
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct ObjectStatement {
+    pub name: Identifier,
+    pub value: ValueStatement,
 }
 
 #[derive(Debug, Clone)]

@@ -15,11 +15,17 @@ class Color {
     b: u8[1<b<2] = 3,
     a: f32 = 1.0;
 }
+
 table Nest {
     color: Color = Red;
     ^require: [1, [2]]
     ^require: {a: 1}
+    ^example: [a]
 }
+
+object a = 1;
+
+
     "#,
     )
     .unwrap();

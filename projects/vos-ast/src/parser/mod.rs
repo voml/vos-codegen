@@ -70,6 +70,8 @@ impl VosVisitor {
                 table.kind = TableKind::Table;
                 self.push_table(table, s.id, s.body)?
             }
+            VosStatementNode::ObjectStatementNode(s) => self.ast.push_object(s.id.as_identifier(), s.value.as_value()?),
+            VosStatementNode::Split(_) => {}
         }
         Ok(())
     }
