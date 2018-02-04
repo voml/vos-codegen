@@ -13,6 +13,7 @@ impl Debug for VosStatement {
         match self {
             VosStatement::Table(v) => Debug::fmt(v, f),
             VosStatement::Object(v) => Debug::fmt(v, f),
+            VosStatement::Union(v) => Debug::fmt(v, f),
         }
     }
 }

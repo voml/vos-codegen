@@ -23,6 +23,7 @@ pub struct VosAST {
 pub enum VosStatement {
     Table(Box<TableStatement>),
     Object(Box<ObjectStatement>),
+    Union(Box<UnionStatement>),
 }
 
 #[derive(Clone, Debug, Default)]
@@ -35,6 +36,12 @@ pub struct TableStatement {
 
 #[derive(Clone, Debug, Default)]
 pub struct ObjectStatement {
+    pub name: Identifier,
+    pub value: ValueStatement,
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct UnionStatement {
     pub name: Identifier,
     pub value: ValueStatement,
 }

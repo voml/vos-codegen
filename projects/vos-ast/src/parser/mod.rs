@@ -2,7 +2,6 @@ use std::{cmp::Ordering, ops::Range, str::FromStr};
 
 use bigdecimal::BigDecimal;
 use peginator::PegParser;
-
 use vos_error::{VosError, VosResult};
 
 use crate::{
@@ -27,6 +26,14 @@ struct VosVisitor {
     errors: Vec<VosError>,
 }
 
+impl FromStr for VosAST {
+    type Err = Vec<VosError>;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        parse(s)
+    }
+}
+
 pub fn parse(input: &str) -> Result<VosAST, Vec<VosError>> {
     let mut parser = VosVisitor { ast: VosAST { statements: vec![] }, file: "".to_string(), errors: vec![] };
     if let Err(e) = parser.parse(input) {
@@ -41,6 +48,7 @@ pub fn parse(input: &str) -> Result<VosAST, Vec<VosError>> {
 pub fn as_range(range: &Range<usize>) -> Range<u32> {
     Range { start: range.start as u32, end: range.end as u32 }
 }
+
 fn as_value(v: &Option<ValueNode>) -> VosResult<ValueStatement> {
     match v {
         Some(s) => s.as_value(),
@@ -71,6 +79,11 @@ impl VosVisitor {
                 self.push_table(table, s.id, s.body)?
             }
             VosStatementNode::ObjectStatementNode(s) => self.ast.push_object(s.id.as_identifier(), s.value.as_value()?),
+            VosStatementNode::UnionStatementNode(_) => {
+                todo!()
+                // s.id.as_identifier()
+                // s.body
+            }
             VosStatementNode::Split(_) => {}
         }
         Ok(())
