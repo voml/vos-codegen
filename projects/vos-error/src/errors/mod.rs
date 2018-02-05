@@ -4,6 +4,7 @@ use std::{
     ops::Range,
     path::PathBuf,
 };
+mod report;
 
 use crate::{Validation, VosError, VosErrorKind};
 
@@ -51,8 +52,14 @@ impl VosError {
 impl<T> Validation<T> {
     pub fn no_problem(&self) -> bool {
         match self {
-            Validation::Success { warn: warn, error, .. } => error.is_empty() && warn.is_empty(),
+            Validation::Success { diagnostics, .. } => diagnostics.is_empty(),
             Validation::Failure { .. } => false,
         }
+    }
+    pub fn is_success(&self) -> bool {
+        matches!(self, Validation::Success { .. })
+    }
+    pub fn is_failure(&self) -> bool {
+        matches!(self, Validation::Failure { .. })
     }
 }
