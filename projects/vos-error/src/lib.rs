@@ -1,6 +1,8 @@
-use std::ops::Range;
+extern crate core;
 
-use ariadne::ReportKind;
+use std::{ops::Range, path::PathBuf};
+
+use diagnostic::DiagnosticLevel;
 
 mod errors;
 mod for_3rd;
@@ -19,26 +21,28 @@ pub enum Validation<T> {
 #[derive(Debug)]
 pub struct VosError {
     kind: Box<VosErrorKind>,
-    level: ReportKind,
+    level: DiagnosticLevel,
 }
 
 #[derive(Debug)]
 pub enum VosErrorKind {
     IOError(IOError),
     ParseError(String),
+    RuntimeError(String),
     DuplicateFields(DuplicateFields),
     UnknownError,
 }
 
 #[derive(Debug)]
 pub struct IOError {
-    error: std::io::Error,
-    source: String,
+    pub error: std::io::Error,
+    pub source: PathBuf,
 }
 
 #[derive(Debug)]
 pub struct DuplicateFields {
-    symbol: String,
-    source: Span,
-    other: Span,
+    pub path: String,
+    pub symbol: String,
+    pub lhs: Span,
+    pub rhs: Span,
 }

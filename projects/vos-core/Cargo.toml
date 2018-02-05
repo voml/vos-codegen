@@ -15,9 +15,8 @@ vos-ast = "0.1.0"
 num = "0.4.0"
 
 [dependencies.vos-error]
-version= "0.1.1"
+version= "0.2.0"
 features = ["num"]
-path = "../vos-error"
 
 [dev-dependencies]
 

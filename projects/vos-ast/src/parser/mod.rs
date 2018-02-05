@@ -2,7 +2,7 @@ use std::{cmp::Ordering, ops::Range, str::FromStr};
 
 use bigdecimal::BigDecimal;
 use peginator::PegParser;
-use vos_error::{VosError, VosResult};
+use vos_error::{Validation, VosError, VosResult};
 
 use crate::{
     ast::{TableKind, TableStatement, VosAST, VosStatement},
@@ -34,7 +34,7 @@ impl FromStr for VosAST {
     }
 }
 
-pub fn parse(input: &str) -> Result<VosAST, Vec<VosError>> {
+pub fn parse(input: &str) -> Validation<VosAST> {
     let mut parser = VosVisitor { ast: VosAST { statements: vec![] }, file: "".to_string(), errors: vec![] };
     if let Err(e) = parser.parse(input) {
         return Err(vec![e]);

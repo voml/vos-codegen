@@ -1,4 +1,5 @@
-use vos_ast::parse;
+use vos_ast::{parse, VosAST};
+use vos_error::VosError;
 
 #[test]
 fn ready() {
@@ -7,27 +8,10 @@ fn ready() {
 
 #[test]
 fn test() {
-    let vos = parse(
-        r#"
-class Color {
-    r: u8[<=9] = 8,
-    g: u8[1..=2] = 7;
-    b: u8[1<b<2] = 3,
-    a: f32 = 1.0;
-}
-
-table Nest {
-    color: Color = Red;
-    ^require: [1, [2]]
-    ^require: {a: 1}
-    ^example: [a]
-}
-
-object a = 1;
-
-
-    "#,
-    )
-    .unwrap();
-    println!("{:#?}", vos)
+    let mut text = match parse(include_str!("basic.vos")) {
+        Ok(o) => {
+            println!("{:#?}", o)
+        }
+        Err(e) => {}
+    };
 }

@@ -3,22 +3,27 @@ use std::{
     num::{ParseFloatError, ParseIntError},
 };
 
-use crate::{VosError, VosErrorKind};
+use diagnostic::DiagnosticLevel;
+
+use crate::{IOError, VosError, VosErrorKind};
 
 impl From<Error> for VosError {
-    fn from(e: Error) -> Self {
-        Self { kind: Box::new(VosErrorKind::IOError(e)), file: "".to_string(), range: None }
+    fn from(error: Error) -> Self {
+        let e = IOError { error, source: Default::default() };
+        Self { kind: Box::new(VosErrorKind::IOError(e)), level: DiagnosticLevel::Error }
     }
 }
 
 impl From<ParseIntError> for VosError {
-    fn from(e: ParseIntError) -> Self {
-        Self { kind: Box::new(VosErrorKind::ParseError(e.to_string())), file: "".to_string(), range: None }
+    fn from(error: ParseIntError) -> Self {
+        let e = error.to_string();
+        Self { kind: Box::new(VosErrorKind::ParseError(e)), level: DiagnosticLevel::Error }
     }
 }
 
 impl From<ParseFloatError> for VosError {
-    fn from(e: ParseFloatError) -> Self {
-        Self { kind: Box::new(VosErrorKind::ParseError(e.to_string())), file: "".to_string(), range: None }
+    fn from(error: ParseFloatError) -> Self {
+        let e = error.to_string();
+        Self { kind: Box::new(VosErrorKind::ParseError(e)), level: DiagnosticLevel::Error }
     }
 }
