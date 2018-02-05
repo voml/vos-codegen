@@ -1,5 +1,5 @@
-use vos_ast::{parse, VosAST};
-use vos_error::VosError;
+use diagnostic::TextStorage;
+use vos_ast::parse;
 
 #[test]
 fn ready() {
@@ -8,10 +8,8 @@ fn ready() {
 
 #[test]
 fn test() {
-    let mut text = match parse(include_str!("basic.vos")) {
-        Ok(o) => {
-            println!("{:#?}", o)
-        }
-        Err(e) => {}
-    };
+    let mut store = TextStorage::default();
+    let file1 = store.file("tests/basic.vos").unwrap();
+    let ast = parse(include_str!("basic.vos"));
+    ast.eprint(&store).unwrap()
 }

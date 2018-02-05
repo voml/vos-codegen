@@ -1,8 +1,15 @@
-use std::{cmp::Ordering, ops::Range, str::FromStr};
+use std::{
+    cmp::Ordering,
+    fs::read_to_string,
+    ops::Range,
+    path::{Path, PathBuf},
+    str::FromStr,
+};
 
 use bigdecimal::BigDecimal;
 use peginator::PegParser;
-use vos_error::{Validation, VosError, VosResult};
+
+use vos_error::{IOError, Validation, VosError, VosResult};
 
 use crate::{
     ast::{TableKind, TableStatement, VosAST, VosStatement},
@@ -22,27 +29,32 @@ mod vos;
 
 struct VosVisitor {
     ast: VosAST,
-    file: String,
+    file: PathBuf,
     errors: Vec<VosError>,
 }
 
 impl FromStr for VosAST {
-    type Err = Vec<VosError>;
+    type Err = VosError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        parse(s)
+        match parse(s) {
+            Validation::Success { value, diagnostics: _ } => Ok(value),
+            Validation::Failure { fatal, diagnostics: _ } => Err(fatal),
+        }
     }
 }
 
-pub fn parse(input: &str) -> Validation<VosAST> {
-    let mut parser = VosVisitor { ast: VosAST { statements: vec![] }, file: "".to_string(), errors: vec![] };
-    if let Err(e) = parser.parse(input) {
-        return Err(vec![e]);
+pub fn parse<P>(path: P) -> Validation<VosAST>
+where
+    P: AsRef<Path>,
+{
+    let file = path.as_ref().to_path_buf();
+    let mut parser = VosVisitor { ast: VosAST { statements: vec![] }, file, errors: vec![] };
+    match parser.parse(path) {
+        Ok(_) => {}
+        Err(e) => return Validation::Failure { fatal: e, diagnostics: vec![] },
     }
-    match parser.errors.is_empty() {
-        true => Ok(parser.ast),
-        false => Err(parser.errors),
-    }
+    Validation::Success { value: parser.ast, diagnostics: parser.errors }
 }
 
 pub fn as_range(range: &Range<usize>) -> Range<u32> {
@@ -57,7 +69,9 @@ fn as_value(v: &Option<ValueNode>) -> VosResult<ValueStatement> {
 }
 
 impl VosVisitor {
-    pub fn parse(&mut self, input: &str) -> VosResult {
+    pub fn parse(&mut self) -> VosResult {
+        let text = read_to_string(&self.file)?;
+
         for statement in VosParser::parse(input)?.statements {
             match self.visit_statement(statement) {
                 Ok(_) => {}
@@ -66,6 +80,13 @@ impl VosVisitor {
         }
         return Ok(());
     }
+    fn read_file(&mut self) -> VosResult<String> {
+        match read_to_string(&self.file) {
+            Ok(o) => Ok(o),
+            Err(e) => IOError { error: e, source: self.file.clone() },
+        }
+    }
+
     fn visit_statement(&mut self, node: VosStatementNode) -> VosResult {
         match node {
             VosStatementNode::StructDeclareNode(s) => {

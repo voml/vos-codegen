@@ -2,6 +2,7 @@ extern crate core;
 
 use std::{ops::Range, path::PathBuf};
 
+pub use self::for_std::io_error::read_file_string;
 use diagnostic::DiagnosticLevel;
 
 mod errors;
@@ -35,7 +36,7 @@ pub enum VosErrorKind {
 
 #[derive(Debug)]
 pub struct IOError {
-    pub error: std::io::Error,
+    pub error: String,
     pub source: PathBuf,
 }
 

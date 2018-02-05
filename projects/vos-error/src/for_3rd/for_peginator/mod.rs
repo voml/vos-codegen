@@ -1,5 +1,4 @@
 use diagnostic::DiagnosticLevel;
-use std::ops::Range;
 
 use peginator::ParseError;
 

@@ -1,18 +1,13 @@
 use std::{
+    fs::read_to_string,
     io::Error,
     num::{ParseFloatError, ParseIntError},
 };
 
 use diagnostic::DiagnosticLevel;
 
-use crate::{IOError, VosError, VosErrorKind};
-
-impl From<Error> for VosError {
-    fn from(error: Error) -> Self {
-        let e = IOError { error, source: Default::default() };
-        Self { kind: Box::new(VosErrorKind::IOError(e)), level: DiagnosticLevel::Error }
-    }
-}
+use crate::{IOError, VosError, VosErrorKind, VosResult};
+pub mod io_error;
 
 impl From<ParseIntError> for VosError {
     fn from(error: ParseIntError) -> Self {
