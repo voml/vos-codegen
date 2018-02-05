@@ -7,8 +7,15 @@ mod for_std;
 pub type VosResult<T = ()> = Result<T, VosError>;
 
 #[derive(Debug)]
+pub enum Validation<T> {
+    Success { value: T, warn: Vec<VosError>, error: Vec<VosError> },
+    Failure { fatal: VosError, warn: Vec<VosError>, error: Vec<VosError> },
+}
+
+#[derive(Debug)]
 pub struct VosError {
     kind: Box<VosErrorKind>,
+    level: Diag,
     file: String,
     range: Option<Range<u32>>,
 }

@@ -17,6 +17,7 @@ num = "0.4.0"
 [dependencies.vos-error]
 version= "0.1.1"
 features = ["num"]
+path = "../vos-error"
 
 [dev-dependencies]
 

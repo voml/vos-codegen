@@ -1,14 +1,5 @@
-use vos_ast::VosAST;
-use vos_error::{VosError, VosResult};
+use vos_error::VosError;
 
-pub struct Schema {
+mod parser;
 
-}
-
-
-impl Schema {
-    pub fn parse(input: &str) -> Result<Self, Vec<VosError>> {
-        VosAST::
-
-    }
-}
+pub struct Schema {}

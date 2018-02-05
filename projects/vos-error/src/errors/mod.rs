@@ -5,7 +5,7 @@ use std::{
     path::PathBuf,
 };
 
-use crate::{VosError, VosErrorKind};
+use crate::{Validation, VosError, VosErrorKind};
 
 impl Display for VosError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -45,5 +45,14 @@ impl VosError {
 impl VosError {
     pub fn parse_error(message: impl Into<String>) -> Self {
         Self { kind: Box::new(VosErrorKind::ParseError(message.into())), file: "".to_string(), range: None }
+    }
+}
+
+impl<T> Validation<T> {
+    pub fn no_problem(&self) -> bool {
+        match self {
+            Validation::Success { warn: warn, error, .. } => error.is_empty() && warn.is_empty(),
+            Validation::Failure { .. } => false,
+        }
     }
 }
