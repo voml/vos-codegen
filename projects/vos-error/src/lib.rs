@@ -1,23 +1,17 @@
-extern crate core;
+use std::path::PathBuf;
 
-use std::{ops::Range, path::PathBuf};
-
-pub use self::for_std::io_error::read_file_string;
 use diagnostic::DiagnosticLevel;
+
+pub use self::errors::report::eprint;
 
 mod errors;
 mod for_3rd;
 mod for_std;
 
-pub type Span = Range<usize>;
+pub use diagnostic::Span;
+pub type Validation<T> = diagnostic::Validation<T, VosError>;
 
 pub type VosResult<T = ()> = Result<T, VosError>;
-
-#[derive(Debug)]
-pub enum Validation<T> {
-    Success { value: T, diagnostics: Vec<VosError> },
-    Failure { fatal: VosError, diagnostics: Vec<VosError> },
-}
 
 #[derive(Debug)]
 pub struct VosError {

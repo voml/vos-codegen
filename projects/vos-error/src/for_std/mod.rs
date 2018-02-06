@@ -1,12 +1,11 @@
 use std::{
-    fs::read_to_string,
     io::Error,
     num::{ParseFloatError, ParseIntError},
 };
 
 use diagnostic::DiagnosticLevel;
 
-use crate::{IOError, VosError, VosErrorKind, VosResult};
+use crate::{IOError, VosError, VosErrorKind};
 pub mod io_error;
 
 impl From<ParseIntError> for VosError {

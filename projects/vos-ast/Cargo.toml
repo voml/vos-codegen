@@ -16,7 +16,6 @@ num = "0.4.0"
 bigdecimal = "0.3.0"
 peginator = "0.3.0"
 unicode-ident = "1.0.5"
-diagnostic = "0.2.0"
 
 [dependencies.vos-error]
 version = "0.2.0"

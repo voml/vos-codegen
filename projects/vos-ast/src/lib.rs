@@ -5,4 +5,4 @@ mod ast;
 #[allow(non_camel_case_types)]
 mod parser;
 
-pub use self::parser::parse;
+pub use self::parser::parse_file;

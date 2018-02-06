@@ -2,7 +2,7 @@ use super::*;
 
 impl Default for ValueKind {
     fn default() -> Self {
-        Self::Default
+        Self::Null
     }
 }
 

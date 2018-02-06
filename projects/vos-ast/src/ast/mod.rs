@@ -14,7 +14,7 @@ mod display;
 mod table;
 mod value;
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct VosAST {
     pub statements: Vec<VosStatement>,
 }
@@ -99,7 +99,7 @@ pub struct ValueStatement {
 
 #[derive(Clone, PartialEq)]
 pub enum ValueKind {
-    Default,
+    Null,
     Boolean(bool),
     String(String),
     Number(BigDecimal),

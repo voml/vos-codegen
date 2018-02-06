@@ -63,7 +63,7 @@ impl SpecialNode {
         let kind = match self.string.as_str() {
             "true" => ValueKind::Boolean(true),
             "false" => ValueKind::Boolean(false),
-            _ => ValueKind::Default,
+            _ => ValueKind::Null,
         };
         ValueStatement { kind, range: as_range(&self.position) }
     }

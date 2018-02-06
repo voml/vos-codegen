@@ -2,14 +2,17 @@ use diagnostic::{
     term::{
         emit,
         termcolor::{ColorChoice, StandardStream, WriteColor},
-        Config,
+        TerminalConfig,
     },
-    Diagnostic, DiagnosticLevel, TextStorage,
+    Diagnostic, DiagnosticLevel, FileID, TextStorage,
 };
 
 use crate::{DuplicateFields, IOError, Validation, VosError, VosErrorKind, VosResult};
 
 impl VosError {
+    pub fn info(&mut self) {
+        self.level = DiagnosticLevel::Info;
+    }
     pub fn error(&mut self) {
         self.level = DiagnosticLevel::Error;
     }
@@ -17,33 +20,31 @@ impl VosError {
         self.level = DiagnosticLevel::Warning;
     }
     pub fn fatal(&mut self) {
-        self.level = DiagnosticLevel::Bug;
+        self.level = DiagnosticLevel::Fatal;
     }
 }
 
-impl<T> Validation<T> {
-    pub fn eprint(&self, text: &TextStorage) -> VosResult {
-        let config = Config::default();
-        let w: StandardStream = StandardStream::stderr(ColorChoice::Always);
-        match self {
-            Validation::Success { value: _, diagnostics } => {
-                for diagnostic in diagnostics {
-                    diagnostic.eprint(&mut w.lock(), &config, text)?
-                }
-            }
-            Validation::Failure { fatal, diagnostics } => {
-                for diagnostic in diagnostics {
-                    diagnostic.eprint(&mut w.lock(), &config, text)?
-                }
-                fatal.eprint(&mut w.lock(), &config, text)?
+pub fn eprint<T>(v: &Validation<T>, text: &TextStorage) -> VosResult {
+    let c = TerminalConfig::default();
+    let w: StandardStream = StandardStream::stderr(ColorChoice::Always);
+    match v {
+        Validation::Success { value: _, diagnostics } => {
+            for diagnostic in diagnostics {
+                diagnostic.eprint(&mut w.lock(), &c, text)?
             }
         }
-        Ok(())
+        Validation::Failure { fatal, diagnostics } => {
+            for diagnostic in diagnostics {
+                diagnostic.eprint(&mut w.lock(), &c, text)?
+            }
+            fatal.eprint(&mut w.lock(), &c, text)?
+        }
     }
+    Ok(())
 }
 
 impl VosError {
-    pub fn eprint(&self, writer: &mut impl WriteColor, config: &Config, text: &TextStorage) -> VosResult {
+    pub fn eprint(&self, writer: &mut impl WriteColor, config: &TerminalConfig, text: &TextStorage) -> VosResult {
         emit(writer, config, text, &self.as_report())?;
         Ok(())
     }
@@ -67,7 +68,7 @@ impl VosError {
 
 impl IOError {
     pub fn as_report(&self, level: DiagnosticLevel) -> Diagnostic {
-        let file_id = match TextStorage::canonicalize(&self.source) {
+        let file_id = match FileID::from(&self.source) {
             Ok(o) => o,
             Err(_) => anonymous(),
         };
@@ -77,7 +78,7 @@ impl IOError {
 
 impl DuplicateFields {
     pub fn as_report(&self, level: DiagnosticLevel) -> Diagnostic {
-        let file_id = match TextStorage::canonicalize(&self.path) {
+        let file_id = match FileID::from(&self.path) {
             Ok(o) => o,
             Err(_) => anonymous(),
         };

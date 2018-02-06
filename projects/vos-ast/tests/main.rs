@@ -1,5 +1,5 @@
 use diagnostic::TextStorage;
-use vos_ast::parse;
+use vos_ast::parse_file;
 
 #[test]
 fn ready() {
@@ -10,6 +10,6 @@ fn ready() {
 fn test() {
     let mut store = TextStorage::default();
     let file1 = store.file("tests/basic.vos").unwrap();
-    let ast = parse(include_str!("basic.vos"));
+    let ast = parse_file(include_str!("basic.vos"));
     ast.eprint(&store).unwrap()
 }
