@@ -1,8 +1,8 @@
-use crate::{VosError, VosErrorKind};
+use crate::VosError;
 use num::bigint::ParseBigIntError;
 
 impl From<ParseBigIntError> for VosError {
-    fn from(e: ParseBigIntError) -> Self {
-        Self { kind: Box::new(VosErrorKind::ParseError(e.to_string())), file: "".to_string(), range: None }
+    fn from(error: ParseBigIntError) -> Self {
+        Self::parse_error(error.to_string())
     }
 }

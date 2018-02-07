@@ -1,12 +1,11 @@
-use diagnostic::DiagnosticLevel;
 use std::{
     error::Error,
     fmt::{Display, Formatter},
 };
 
-pub mod report;
-
 use crate::{VosError, VosErrorKind};
+
+pub mod report;
 
 impl Display for VosError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -19,11 +18,5 @@ impl Error for VosError {}
 impl VosError {
     pub fn kind(&self) -> &VosErrorKind {
         &*self.kind
-    }
-}
-
-impl VosError {
-    pub fn parse_error(message: impl Into<String>) -> Self {
-        Self { kind: Box::new(VosErrorKind::ParseError(message.into())), level: DiagnosticLevel::Error }
     }
 }

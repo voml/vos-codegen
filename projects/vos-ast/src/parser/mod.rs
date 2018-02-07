@@ -1,17 +1,9 @@
-use std::{
-    cmp::Ordering,
-    fmt::Display,
-    fs::read_to_string,
-    ops::Range,
-    path::{Path, PathBuf},
-    str::FromStr,
-};
+use std::{cmp::Ordering, fmt::Display, fs::read_to_string, ops::Range, path::Path, str::FromStr};
 
 use bigdecimal::BigDecimal;
-use diagnostic::TextStorage;
 use peginator::PegParser;
 
-use vos_error::{Validation, VosError, VosResult};
+use vos_error::{FileID, Validation, VosError, VosResult};
 
 use crate::{
     ast::{TableKind, TableStatement, VosAST, VosStatement},
@@ -31,45 +23,29 @@ mod vos;
 
 struct VosVisitor {
     ast: VosAST,
-    file: Option<PathBuf>,
+    file_id: FileID,
     text: String,
     errors: Vec<VosError>,
 }
 
-impl FromStr for VosAST {
-    type Err = VosError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match parse_file(s) {
-            Validation::Success { value, diagnostics: _ } => Ok(value),
-            Validation::Failure { fatal, diagnostics: _ } => Err(fatal),
-        }
-    }
-}
-
-pub fn parse_text<S>(path: S) -> Validation<VosAST>
+pub fn parse_text<S>(text: S) -> Validation<VosAST>
 where
-    P: AsRef<Path>,
     S: Display,
 {
-    let file = path.as_ref().to_path_buf();
-    let mut parser = VosVisitor { ast: VosAST { statements: vec![] }, text: "".to_string(), file, errors: vec![] };
-    match parser.do_parse() {
-        Ok(_) => {}
-        Err(e) => return Validation::Failure { fatal: e, diagnostics: vec![] },
+    match VosVisitor::parse_text(text.to_string()) {
+        Ok(o) => Validation::Success { value: o.ast, diagnostics: o.errors },
+        Err(e) => Validation::Failure { fatal: e, diagnostics: vec![] },
     }
-    Validation::Success { value: parser.ast, diagnostics: parser.errors }
 }
 
 pub fn parse_file<P>(path: P) -> Validation<VosAST>
 where
     P: AsRef<Path>,
 {
-    match VosVisitor::parse_file(path.as_ref().to_path_buf()) {
-        Ok(o) => o,
-        Err(e) => return Validation::Failure { fatal: e, diagnostics: vec![] },
+    match VosVisitor::parse_file(path.as_ref()) {
+        Ok(o) => Validation::Success { value: o.ast, diagnostics: o.errors },
+        Err(e) => Validation::Failure { fatal: e, diagnostics: vec![] },
     }
-    Validation::Success { value: parser.ast, diagnostics: parser.errors }
 }
 
 pub fn as_range(range: &Range<usize>) -> Range<u32> {
@@ -84,42 +60,29 @@ fn as_value(v: &Option<ValueNode>) -> VosResult<ValueStatement> {
 }
 
 impl VosVisitor {
-    pub fn parse_file(file: PathBuf) -> VosResult<String> {
-        let mut parser = Self { ast: Default::default(), file: Some(file.clone()), text: "".to_string(), errors: vec![] };
-        match parser.do_parse() {
-            Ok(o) => Ok(o),
-            Err(e) => Err(e.with_path(file)),
-        }
+    pub fn parse_file(file: &Path) -> VosResult<Self> {
+        let id = FileID::try_from(file)?;
+        let text = read_to_string(file)?;
+        let mut parser = Self { ast: Default::default(), file_id: id, text, errors: vec![] };
+        parser.do_parse()?;
+        Ok(parser)
     }
-    pub fn parse_text(text: String) -> VosResult<String> {
-        let mut parser = Self { ast: Default::default(), file: None, text, errors: vec![] };
-        parser.do_parse()
+    pub fn parse_text(text: String) -> VosResult<Self> {
+        let id = FileID::from(&text);
+        let mut parser = Self { ast: Default::default(), file_id: id, text, errors: vec![] };
+        parser.do_parse()?;
+        Ok(parser)
     }
 
-    fn do_parse(&mut self) -> VosResult<String> {
-        let mut file_id = self.read_file()?;
+    fn do_parse(&mut self) -> VosResult {
         for statement in VosParser::parse(&self.text)?.statements {
             match self.visit_statement(statement) {
                 Ok(_) => {}
                 Err(e) => self.errors.push(e),
             }
         }
-        return Ok(file_id);
+        return Ok(());
     }
-    fn read_file(&mut self) -> VosResult<String> {
-        match &self.file {
-            Some(s) => {
-                let file_id = TextStorage::canonicalize(s)?;
-                self.text = read_to_string(&self.file)?;
-                Ok(file_id)
-            }
-            None => {
-                let file_id = "<anonymous>";
-                Ok(file_id.to_string())
-            }
-        }
-    }
-
     fn visit_statement(&mut self, node: VosStatementNode) -> VosResult {
         match node {
             VosStatementNode::StructDeclareNode(s) => {

@@ -18,7 +18,7 @@ peginator = "0.3.0"
 unicode-ident = "1.0.5"
 
 [dependencies.vos-error]
-version = "0.2.0"
+version = "0.2.1"
 path = "../vos-error"
 features = ["bigdecimal", "peginator"]
 

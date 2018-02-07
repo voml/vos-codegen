@@ -9,6 +9,6 @@ impl From<ParseError> for VosError {
         // let p = error.position as u32;
         let e = error.specifics.to_string();
 
-        Self { kind: Box::new(VosErrorKind::ParseError(e)), level: DiagnosticLevel::Error }
+        Self { kind: Box::new(VosErrorKind::ParseError(e)), level: DiagnosticLevel::Error, file: Default::default() }
     }
 }

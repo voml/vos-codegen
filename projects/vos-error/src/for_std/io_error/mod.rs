@@ -1,31 +1,22 @@
-use std::path::PathBuf;
+use diagnostic::FileID;
 
 use super::*;
 
 impl From<Error> for VosError {
     fn from(error: Error) -> Self {
-        IOError { error: error.to_string(), source: Default::default() }.into()
-    }
-}
-
-impl From<IOError> for VosError {
-    fn from(error: IOError) -> Self {
-        Self { kind: Box::new(VosErrorKind::IOError(error)), level: DiagnosticLevel::Error }
+        Self { kind: Box::new(VosErrorKind::IOError(error)), level: DiagnosticLevel::Error, file: Default::default() }
     }
 }
 
 impl VosError {
-    pub fn with_path(mut self, path: PathBuf) -> VosError {
-        self.set_path(path);
+    pub fn with_file(mut self, file: impl TryInto<FileID>) -> Self {
+        match file.try_into() {
+            Ok(o) => self.file = o,
+            Err(_) => {}
+        }
         self
     }
-    pub fn set_path(&mut self, path: PathBuf) {
-        match self.kind.as_mut() {
-            VosErrorKind::IOError(i) => i.source = path,
-            VosErrorKind::ParseError(_) => {}
-            VosErrorKind::RuntimeError(_) => {}
-            VosErrorKind::DuplicateFields(_) => {}
-            VosErrorKind::UnknownError => {}
-        }
+    pub fn set_file(&mut self, file: impl Into<FileID>) {
+        self.file = file.into();
     }
 }

@@ -1,6 +1,4 @@
-use std::path::PathBuf;
-
-use diagnostic::DiagnosticLevel;
+pub use diagnostic::{DiagnosticLevel, FileID, Span, TextStorage};
 
 pub use self::errors::report::eprint;
 
@@ -8,7 +6,6 @@ mod errors;
 mod for_3rd;
 mod for_std;
 
-pub use diagnostic::Span;
 pub type Validation<T> = diagnostic::Validation<T, VosError>;
 
 pub type VosResult<T = ()> = Result<T, VosError>;
@@ -17,11 +14,12 @@ pub type VosResult<T = ()> = Result<T, VosError>;
 pub struct VosError {
     kind: Box<VosErrorKind>,
     level: DiagnosticLevel,
+    file: FileID,
 }
 
 #[derive(Debug)]
 pub enum VosErrorKind {
-    IOError(IOError),
+    IOError(std::io::Error),
     ParseError(String),
     RuntimeError(String),
     DuplicateFields(DuplicateFields),
@@ -29,14 +27,7 @@ pub enum VosErrorKind {
 }
 
 #[derive(Debug)]
-pub struct IOError {
-    pub error: String,
-    pub source: PathBuf,
-}
-
-#[derive(Debug)]
 pub struct DuplicateFields {
-    pub path: String,
     pub symbol: String,
     pub lhs: Span,
     pub rhs: Span,
