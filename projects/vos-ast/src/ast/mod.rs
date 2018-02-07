@@ -7,6 +7,7 @@ use std::{
 
 use bigdecimal::BigDecimal;
 use indexmap::IndexMap;
+use vos_error::Span;
 
 mod constraint;
 mod define;
@@ -94,7 +95,7 @@ pub struct ConstraintStatement {
 #[derive(Clone, Default)]
 pub struct ValueStatement {
     pub kind: ValueKind,
-    pub range: Range<u32>,
+    pub range: Span,
 }
 
 #[derive(Clone, PartialEq)]
@@ -116,5 +117,5 @@ pub struct Namespace {
 #[derive(Clone, Default)]
 pub struct Identifier {
     pub id: String,
-    pub range: Range<u32>,
+    pub range: Span,
 }

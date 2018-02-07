@@ -1,7 +1,7 @@
 use diagnostic::{
     term::{
         emit,
-        termcolor::{ColorChoice, StandardStream, WriteColor},
+        termcolor::{ColorChoice, StandardStream},
         TerminalConfig,
     },
     Diagnostic, DiagnosticLevel, FileID, TextStorage,
@@ -32,44 +32,29 @@ impl VosError {
 pub fn eprint<T>(v: &Validation<T>, text: &TextStorage) -> VosResult {
     let c = TerminalConfig::default();
     let w: StandardStream = StandardStream::stderr(ColorChoice::Always);
-    match v {
-        Validation::Success { value: _, diagnostics } => {
-            for diagnostic in diagnostics {
-                diagnostic.eprint(&mut w.lock(), &c, text)?
-            }
-        }
-        Validation::Failure { fatal, diagnostics } => {
-            for diagnostic in diagnostics {
-                diagnostic.eprint(&mut w.lock(), &c, text)?
-            }
-            fatal.eprint(&mut w.lock(), &c, text)?
-        }
+    for diagnostic in v.collect_diagnostics() {
+        emit(&mut w.lock(), &c, text, &diagnostic)?
     }
     Ok(())
 }
 
-impl VosError {
-    pub fn eprint(&self, writer: &mut impl WriteColor, config: &TerminalConfig, text: &TextStorage) -> VosResult {
-        emit(writer, config, text, &self.as_report())?;
-        Ok(())
-    }
-
-    pub fn as_report(&self) -> Diagnostic {
-        match self.kind() {
+impl From<&VosError> for Diagnostic {
+    fn from(value: &VosError) -> Self {
+        match value.kind() {
             VosErrorKind::IOError(e) => {
-                Diagnostic::new(self.level).with_code("A0002").with_message(e).with_primary(&self.file, 0..0, "IOError")
+                Diagnostic::new(value.level).with_code("A0002").with_message(e).with_primary(&value.file, 0..0, "IOError")
             }
             VosErrorKind::ParseError(e) => {
-                Diagnostic::new(self.level).with_code("A0002").with_message(e).with_primary(&self.file, 0..0, "ParseError")
+                Diagnostic::new(value.level).with_code("A0002").with_message(e).with_primary(&value.file, 0..0, "ParseError")
             }
             VosErrorKind::RuntimeError(e) => {
-                Diagnostic::new(self.level).with_code("A0002").with_message(e).with_primary(&self.file, 0..0, "RuntimeError")
+                Diagnostic::new(value.level).with_code("A0002").with_message(e).with_primary(&value.file, 0..0, "RuntimeError")
             }
-            VosErrorKind::DuplicateFields(e) => e.as_report(self.level, &self.file),
-            VosErrorKind::UnknownError => Diagnostic::new(self.level)
+            VosErrorKind::DuplicateFields(e) => e.as_report(value.level, &value.file),
+            VosErrorKind::UnknownError => Diagnostic::new(value.level)
                 .with_code("A0002")
                 .with_message("UnknownError")
-                .with_primary(&self.file, 0..0, "DuplicateFields"),
+                .with_primary(&value.file, 0..0, "DuplicateFields"),
         }
     }
 }

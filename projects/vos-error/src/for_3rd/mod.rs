@@ -24,7 +24,7 @@ impl VosError {
     {
         Self {
             kind: Box::new(VosErrorKind::RuntimeError(msg.to_string())),
-            level: DiagnosticLevel::Info,
+            level: DiagnosticLevel::Error,
             file: Default::default(),
         }
     }

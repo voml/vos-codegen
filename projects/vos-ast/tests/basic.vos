@@ -7,9 +7,10 @@ class Color {
 
 table Nest {
     color: Color = Red;
+    color: Color = Red;
     ^require: [1, [2]]
     ^require: {a: 1}
     ^example: [a]
 }
 
-objec a = 1;
+object a = 1;

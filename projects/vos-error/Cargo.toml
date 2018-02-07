@@ -1,6 +1,6 @@
 [package]
 name = "vos-error"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["Aster <192607617@qq.com>"]
 description = "Virtual Object Schema shared error types"
 repository = "https://github.com/voml/vos-rs"
@@ -11,11 +11,15 @@ license = "MPL-2.0"
 edition = "2021"
 
 [dependencies]
-diagnostic = "0.3.1"
+#diagnostic = "0.3.1"
 peginator = { version = "0.3.0", optional = true }
 num = { version = "0.4.0", optional = true }
 bigdecimal = { version = "0.3.0", optional = true }
 serde_json = { version = "1.0.87", optional = true }
+
+[dependencies.diagnostic]
+git = "https://github.com/oovm/diagnostic-rs"
+rev = "05b9a348"
 
 [dev-dependencies]
 

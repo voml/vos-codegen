@@ -1,9 +1,9 @@
-use std::{cmp::Ordering, fmt::Display, fs::read_to_string, ops::Range, path::Path, str::FromStr};
+use std::{cmp::Ordering, fmt::Display, ops::Range, str::FromStr};
 
 use bigdecimal::BigDecimal;
 use peginator::PegParser;
 
-use vos_error::{FileID, Validation, VosError, VosResult};
+use vos_error::{DuplicateFields, FileID, Validation, VosError, VosResult};
 
 use crate::{
     ast::{TableKind, TableStatement, VosAST, VosStatement},
@@ -28,21 +28,11 @@ struct VosVisitor {
     errors: Vec<VosError>,
 }
 
-pub fn parse_text<S>(text: S) -> Validation<VosAST>
+pub fn parse<S>(text: S, id: &FileID) -> Validation<VosAST>
 where
     S: Display,
 {
-    match VosVisitor::parse_text(text.to_string()) {
-        Ok(o) => Validation::Success { value: o.ast, diagnostics: o.errors },
-        Err(e) => Validation::Failure { fatal: e, diagnostics: vec![] },
-    }
-}
-
-pub fn parse_file<P>(path: P) -> Validation<VosAST>
-where
-    P: AsRef<Path>,
-{
-    match VosVisitor::parse_file(path.as_ref()) {
+    match VosVisitor::parse_text(text.to_string(), id.clone()) {
         Ok(o) => Validation::Success { value: o.ast, diagnostics: o.errors },
         Err(e) => Validation::Failure { fatal: e, diagnostics: vec![] },
     }
@@ -60,16 +50,8 @@ fn as_value(v: &Option<ValueNode>) -> VosResult<ValueStatement> {
 }
 
 impl VosVisitor {
-    pub fn parse_file(file: &Path) -> VosResult<Self> {
-        let id = FileID::try_from(file)?;
-        let text = read_to_string(file)?;
-        let mut parser = Self { ast: Default::default(), file_id: id, text, errors: vec![] };
-        parser.do_parse()?;
-        Ok(parser)
-    }
-    pub fn parse_text(text: String) -> VosResult<Self> {
-        let id = FileID::from(&text);
-        let mut parser = Self { ast: Default::default(), file_id: id, text, errors: vec![] };
+    pub fn parse_text(text: String, file_id: FileID) -> VosResult<Self> {
+        let mut parser = Self { ast: Default::default(), file_id, text, errors: vec![] };
         parser.do_parse()?;
         Ok(parser)
     }
@@ -112,7 +94,9 @@ impl VosVisitor {
                 DeclareBodyNode::FieldStatementNode(v) => match table.add_field(v.as_field()?) {
                     Ok(_) => {}
                     Err(e) => {
-                        todo!("重复的 key {}", e.name)
+                        let error =
+                            DuplicateFields { symbol: e.name.id.to_string(), lhs: e.name.range, rhs: Default::default() };
+                        self.errors.push(error.build(self.file_id.clone()))
                     }
                 },
                 DeclareBodyNode::ConstraintStatementNode(v) => table.add_constraint(v.as_constraint()?),
