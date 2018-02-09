@@ -39,11 +39,11 @@ impl GenericStatement {
 }
 
 impl Namespace {
-    pub fn new(name: String, range: Range<u32>) -> Self {
-        Self { scope: vec![Identifier { id: name, range }] }
+    pub fn new(name: String, range: Span) -> Self {
+        Self { scope: vec![Identifier { id: name, span: range }] }
     }
-    pub fn push_identifier(&mut self, name: String, range: Range<u32>) {
-        self.scope.push(Identifier { id: name, range })
+    pub fn push_identifier(&mut self, name: String, range: Span) {
+        self.scope.push(Identifier { id: name, span: range })
     }
 }
 

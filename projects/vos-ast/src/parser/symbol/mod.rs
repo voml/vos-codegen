@@ -28,6 +28,6 @@ impl IdentifierNode {
         self.string.to_string()
     }
     pub fn as_identifier(&self) -> Identifier {
-        Identifier { id: self.as_string(), range: as_range(&self.position) }
+        Identifier { id: self.as_string(), span: self.position.clone() }
     }
 }

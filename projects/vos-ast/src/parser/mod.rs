@@ -1,9 +1,9 @@
-use std::{cmp::Ordering, fmt::Display, ops::Range, str::FromStr};
+use std::{cmp::Ordering, ops::Range, str::FromStr};
 
 use bigdecimal::BigDecimal;
 use peginator::PegParser;
 
-use vos_error::{DuplicateFields, FileID, Validation, VosError, VosResult};
+use vos_error::{DuplicateDeclare, FileID, Validation, VosError, VosResult};
 
 use crate::{
     ast::{TableKind, TableStatement, VosAST, VosStatement},
@@ -28,10 +28,7 @@ struct VosVisitor {
     errors: Vec<VosError>,
 }
 
-pub fn parse<S>(text: S, id: &FileID) -> Validation<VosAST>
-where
-    S: Display,
-{
+pub fn parse(text: &str, id: &FileID) -> Validation<VosAST> {
     match VosVisitor::parse_text(text.to_string(), id.clone()) {
         Ok(o) => Validation::Success { value: o.ast, diagnostics: o.errors },
         Err(e) => Validation::Failure { fatal: e, diagnostics: vec![] },
@@ -94,8 +91,12 @@ impl VosVisitor {
                 DeclareBodyNode::FieldStatementNode(v) => match table.add_field(v.as_field()?) {
                     Ok(_) => {}
                     Err(e) => {
-                        let error =
-                            DuplicateFields { symbol: e.name.id.to_string(), lhs: e.name.range, rhs: Default::default() };
+                        let error = DuplicateDeclare {
+                            kind: "field",
+                            symbol: e.name.id.to_string(),
+                            lhs: e.name.span,
+                            rhs: v.key.as_identifier().span,
+                        };
                         self.errors.push(error.build(self.file_id.clone()))
                     }
                 },

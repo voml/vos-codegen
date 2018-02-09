@@ -22,12 +22,13 @@ pub enum VosErrorKind {
     IOError(std::io::Error),
     ParseError(String),
     RuntimeError(String),
-    DuplicateFields(DuplicateFields),
+    DuplicateFields(DuplicateDeclare),
     UnknownError,
 }
 
 #[derive(Debug)]
-pub struct DuplicateFields {
+pub struct DuplicateDeclare {
+    pub kind: &'static str,
     pub symbol: String,
     pub lhs: Span,
     pub rhs: Span,

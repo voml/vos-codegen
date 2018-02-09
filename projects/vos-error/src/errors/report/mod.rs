@@ -7,7 +7,7 @@ use diagnostic::{
     Diagnostic, DiagnosticLevel, FileID, TextStorage,
 };
 
-use crate::{DuplicateFields, Validation, VosError, VosErrorKind, VosResult};
+use crate::{DuplicateDeclare, Validation, VosError, VosErrorKind, VosResult};
 
 impl VosError {
     pub fn with_level(mut self, level: DiagnosticLevel) -> Self {
@@ -59,12 +59,14 @@ impl From<&VosError> for Diagnostic {
     }
 }
 
-impl DuplicateFields {
+impl DuplicateDeclare {
     pub fn as_report(&self, level: DiagnosticLevel, file: &FileID) -> Diagnostic {
+        let message = format!("Duplicate {}", self.kind);
+        let primary = format!("{} first declared here", self.kind);
+        let secondary = format!("{} duplicate declared here again", self.kind);
         Diagnostic::new(level) //
-            .with_code("E0001")
-            .with_message(&self.lhs.start)
-            .with_primary(file, self.lhs.clone(), &self.lhs.end)
-            .with_secondary(file, self.rhs.clone(), &self.lhs.end)
+            .with_message(message)
+            .with_primary(file, self.lhs.clone(), primary)
+            .with_secondary(file, self.rhs.clone(), secondary)
     }
 }

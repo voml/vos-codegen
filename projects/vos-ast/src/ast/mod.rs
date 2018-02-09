@@ -2,7 +2,6 @@ use std::{
     cmp::Ordering,
     collections::BTreeMap,
     fmt::{Debug, Formatter},
-    ops::Range,
 };
 
 use bigdecimal::BigDecimal;
@@ -95,7 +94,7 @@ pub struct ConstraintStatement {
 #[derive(Clone, Default)]
 pub struct ValueStatement {
     pub kind: ValueKind,
-    pub range: Span,
+    pub span: Span,
 }
 
 #[derive(Clone, PartialEq)]
@@ -117,5 +116,5 @@ pub struct Namespace {
 #[derive(Clone, Default)]
 pub struct Identifier {
     pub id: String,
-    pub range: Span,
+    pub span: Span,
 }

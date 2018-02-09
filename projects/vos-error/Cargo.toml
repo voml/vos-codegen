@@ -19,7 +19,7 @@ serde_json = { version = "1.0.87", optional = true }
 
 [dependencies.diagnostic]
 git = "https://github.com/oovm/diagnostic-rs"
-rev = "05b9a348"
+rev = "cb893898"
 
 [dev-dependencies]
 

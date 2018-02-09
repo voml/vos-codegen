@@ -1,5 +1,4 @@
 use indexmap::IndexMap;
-use peginator::PegPosition;
 
 use crate::parser::vos::{DictItem, ListItem, SpecialNode};
 
@@ -35,7 +34,7 @@ impl ValueNode {
                         ListItem::Split(_) => {}
                     }
                 }
-                Ok(ValueStatement { kind: ValueKind::List(out), range: as_range(v.position()) })
+                Ok(ValueStatement { kind: ValueKind::List(out), span: v.position.clone() })
             }
             ValueNode::DictNode(v) => {
                 let mut out = IndexMap::default();
@@ -52,7 +51,7 @@ impl ValueNode {
                         DictItem::Split(_) => {}
                     }
                 }
-                Ok(ValueStatement { kind: ValueKind::Dict(out), range: as_range(v.position()) })
+                Ok(ValueStatement { kind: ValueKind::Dict(out), span: v.position.clone() })
             }
         }
     }
@@ -65,7 +64,7 @@ impl SpecialNode {
             "false" => ValueKind::Boolean(false),
             _ => ValueKind::Null,
         };
-        ValueStatement { kind, range: as_range(&self.position) }
+        ValueStatement { kind, span: self.position.clone() }
     }
 }
 
@@ -74,7 +73,7 @@ impl NumNode {
         Ok(BigDecimal::from_str(&self.string)?)
     }
     pub fn as_value(&self) -> VosResult<ValueStatement> {
-        Ok(ValueStatement { kind: ValueKind::Number(self.as_num()?), range: as_range(&self.position) })
+        Ok(ValueStatement { kind: ValueKind::Number(self.as_num()?), span: self.position.clone() })
     }
 }
 
@@ -82,12 +81,12 @@ impl NamespaceNode {
     pub fn as_namespace(&self) -> Namespace {
         let mut ns = Namespace::default();
         for id in &self.path {
-            ns.push_identifier(id.as_string(), as_range(&id.position))
+            ns.push_identifier(id.as_string(), id.position.clone())
         }
         ns
     }
     pub fn as_value(&self) -> ValueStatement {
-        ValueStatement { kind: ValueKind::Symbol(self.as_namespace()), range: as_range(&self.position) }
+        ValueStatement { kind: ValueKind::Symbol(self.as_namespace()), span: self.position.clone() }
     }
     pub fn as_generic(&self) -> VosResult<GenericStatement> {
         let generic = GenericStatement::Arguments { arguments: vec![] };

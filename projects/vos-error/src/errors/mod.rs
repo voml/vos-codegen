@@ -3,9 +3,9 @@ use std::{
     fmt::{Display, Formatter},
 };
 
-use diagnostic::{DiagnosticLevel, FileID, Span};
+use diagnostic::{DiagnosticLevel, FileID};
 
-use crate::{DuplicateFields, VosError, VosErrorKind, VosResult};
+use crate::{DuplicateDeclare, VosError, VosErrorKind};
 
 pub mod report;
 
@@ -23,7 +23,7 @@ impl VosError {
     }
 }
 
-impl DuplicateFields {
+impl DuplicateDeclare {
     pub fn build(self, file: FileID) -> VosError {
         VosError { kind: Box::new(VosErrorKind::DuplicateFields(self)), level: DiagnosticLevel::Warning, file }
     }
