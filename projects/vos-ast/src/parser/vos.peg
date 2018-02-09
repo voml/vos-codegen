@@ -30,7 +30,7 @@ ObjectDeclare = 'let' | "var" | 'const' | 'object';
 
 DeclareBodyNode = @:ConstraintStatementNode | @:FieldStatementNode | @:Split;
 
-UnionBodyNode = id:IdentifierNode '=' n:ValueNode;
+UnionBodyNode = id:IdentifierNode ['=' n:ValueNode];
 
 @position
 FieldStatementNode = key:KeyNode ':' type:TypeValueNode ['=' value:ValueNode];
